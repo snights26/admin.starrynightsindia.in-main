@@ -1,0 +1,115 @@
+import { useEffect, useState } from "react";
+import Calendar from "react-calendar";
+import { useNavigate } from "react-router-dom";
+import api from "../../Utils/api";
+import "react-calendar/dist/Calendar.css";
+import "./ScheduledBookings.css";
+
+function ScheduledBookings() {
+  const navigate = useNavigate();
+
+  const [bookings, setBookings] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [searchTourId, setSearchTourId] = useState("");
+
+  useEffect(() => {
+    const loadBookings = async () => {
+      try {
+        const data = await api.get("/tours");
+        setBookings(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load bookings", error);
+        setBookings([]);
+      }
+    };
+
+    loadBookings();
+  }, []);
+
+  const formatDate = (date) => date.toLocaleDateString("en-CA");
+
+  let filteredBookings = bookings;
+
+  if (selectedDate) {
+    filteredBookings = filteredBookings.filter((b) => b.date === formatDate(selectedDate));
+  }
+
+  if (searchTourId.trim() !== "") {
+    filteredBookings = filteredBookings.filter((b) =>
+      (b.tourId || b.id || "").toLowerCase().includes(searchTourId.toLowerCase())
+    );
+  }
+
+  return (
+    <div className="schedule-container">
+      <div className="schedule-table">
+        <div className="schedule-header">
+          <h3>Scheduled Bookings</h3>
+
+          <div className="schedule-actions">
+            <button className="admin-view-btn" onClick={() => navigate("/admin/bookings")}>
+              Manage Bookings
+            </button>
+            <input
+              type="text"
+              placeholder="Search Tour ID..."
+              className="tour-search"
+              value={searchTourId}
+              onChange={(e) => setSearchTourId(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tour ID</th>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Transport Slip</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredBookings.length > 0 ? (
+              filteredBookings.map((b) => (
+                <tr key={b.tourId || b.id}>
+                  <td>{b.tourId || b.id}</td>
+                  <td>{b.name || b.packageName}</td>
+                  <td>{b.date || b.pickupDate}</td>
+                  <td>{b.contact || b.mobile}</td>
+                  <td className={b.status === "Confirmed" ? "status-ok" : "status-pending"}>
+                    {b.status}
+                  </td>
+                  <td>
+                    <button
+                      className="view-btn"
+                      onClick={() => navigate(`/transport-slip/${b.tourId || b.id}`)}
+                    >
+                      Download
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  No bookings found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="calendar-box">
+        <h3>Tour Calendar</h3>
+        <Calendar onChange={(date) => setSelectedDate(date)} value={selectedDate} />
+      </div>
+    </div>
+  );
+}
+
+export default ScheduledBookings;

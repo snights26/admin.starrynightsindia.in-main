@@ -1,0 +1,311 @@
+/* PAGE */
+
+.fr-page{
+  min-height:100vh;
+  background:#0a0a0a;
+  color:#fff;
+  padding:24px;
+  font-family:"Poppins",sans-serif;
+}
+
+
+/* HEADER */
+
+.fr-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:22px;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.fr-header h1{
+  font-size:24px;
+  font-weight:600;
+  color:#fff;
+  margin:0;
+}
+
+.fr-header p{
+  margin-top:4px;
+  color:#7d7d7d;
+  font-size:13px;
+}
+
+
+/* BACK BUTTON */
+
+.fr-back-btn{
+  height:40px;
+  padding:0 16px;
+  border-radius:8px;
+  border:1px solid #232323;
+  background:#141414;
+  color:#d0d0d0;
+  font-size:13px;
+  cursor:pointer;
+  transition:0.2s ease;
+}
+
+.fr-back-btn:hover{
+  border-color:#e50914;
+  color:#fff;
+  background:#1a1a1a;
+}
+
+
+/* ADD CARD */
+
+.fr-add-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  background:#111;
+  border:1px solid #1d1d1d;
+width: 50%;
+  padding:12px;
+  border-radius:12px;
+
+  margin-bottom:18px;
+}
+
+
+/* SELECT */
+
+.fr-select{
+  flex:1;
+}
+
+
+/* ADD BUTTON */
+
+.fr-add-btn{
+  height:42px;
+  padding:0 16px;
+
+  border:none;
+  border-radius:8px;
+
+  background:#e50914;
+  color:white;
+
+  font-size:13px;
+  font-weight:500;
+
+  cursor:pointer;
+  transition:0.2s ease;
+}
+
+.fr-add-btn:hover{
+  background:#ff1f2f;
+  transform:translateY(-1px);
+}
+
+
+/* TABLE CARD */
+
+.fr-table-card{
+  background:#111;
+  border:1px solid #1d1d1d;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+
+/* TABLE */
+
+.fr-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+
+/* HEADER */
+
+.fr-table thead{
+  background:#151515;
+}
+
+.fr-table th{
+  padding:14px;
+  text-align:left;
+
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.3px;
+
+  color:#8f8f8f;
+
+  border-bottom:1px solid #202020;
+}
+
+
+/* BODY */
+
+.fr-table td{
+  padding:14px;
+  font-size:13px;
+  color:#e5e5e5;
+
+  border-bottom:1px solid #1a1a1a;
+}
+
+.fr-table tbody tr{
+  transition:0.2s ease;
+}
+
+.fr-table tbody tr:hover{
+  background:#151515;
+}
+
+
+/* REMOVE BUTTON */
+
+.fr-remove-btn{
+  padding:6px 12px;
+
+  border-radius:7px;
+  border:1px solid #2a2a2a;
+
+  background:transparent;
+  color:#cfcfcf;
+
+  font-size:12px;
+  cursor:pointer;
+
+  transition:0.2s ease;
+}
+
+.fr-remove-btn:hover{
+  background:#1a1a1a;
+  border-color:#e50914;
+  color:#fff;
+}
+
+
+/* TOAST */
+
+.fr-toast{
+  position:fixed;
+  top:20px;
+  right:20px;
+
+  background:#151515;
+  color:#fff;
+
+  border-left:3px solid #e50914;
+
+  padding:10px 14px;
+  border-radius:8px;
+
+  font-size:13px;
+
+  box-shadow:0 8px 25px rgba(0,0,0,0.45);
+}
+
+
+/* REACT SELECT */
+
+.fr__control{
+  min-height:42px !important;
+
+  background:#0f0f0f !important;
+  border:1px solid #262626 !important;
+  border-radius:8px !important;
+
+  box-shadow:none !important;
+}
+
+.fr__control:hover{
+  border-color:#3a3a3a !important;
+}
+
+.fr__control--is-focused{
+  border-color:#e50914 !important;
+}
+
+
+.fr__value-container{
+  padding:0 10px !important;
+}
+
+
+.fr__single-value{
+  color:#fff !important;
+  font-size:13px !important;
+}
+
+
+.fr__placeholder{
+  color:#6f6f6f !important;
+  font-size:13px !important;
+}
+
+
+.fr__input-container{
+  color:white !important;
+}
+
+
+.fr__menu{
+  background:#111 !important;
+  border:1px solid #222 !important;
+  overflow:hidden !important;
+  border-radius:8px !important;
+}
+
+
+.fr__option{
+  background:#111 !important;
+  color:#ddd !important;
+  font-size:13px !important;
+  cursor:pointer !important;
+}
+
+.fr__option--is-focused{
+  background:#1b1b1b !important;
+}
+
+.fr__option--is-selected{
+  background:#e50914 !important;
+}
+
+
+.fr__indicator-separator{
+  display:none !important;
+}
+
+
+.fr__dropdown-indicator svg{
+  fill:#777 !important;
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .fr-page{
+    padding:18px;
+  }
+
+  .fr-add-card{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .fr-add-btn{
+    width:100%;
+  }
+
+  .fr-table{
+    min-width:520px;
+  }
+
+  .fr-table-card{
+    overflow-x:auto;
+  }
+
+}

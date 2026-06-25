@@ -1,0 +1,119 @@
+import "./NotificationsList.css";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import api from "../../Utils/api";
+
+function NotificationsList() {
+
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const data = await api.get("/notifications");
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load notifications", error);
+        setNotifications([]);
+      }
+    };
+
+    loadNotifications();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(notifications.filter(n => n.id !== id && n.notificationId !== id));
+    } catch (error) {
+      console.error("Failed to delete notification", error);
+    }
+  };
+
+  return (
+    <div className="notification-list-page">
+
+      <div className="notification-list-header">
+
+        <div className="notification-list-title">
+          Broadcast Center 🚀
+        </div>
+
+        <div className="notification-list-actions">
+
+          <button
+            className="notification-list-btn notification-list-back"
+            onClick={() => navigate("/dashboard")}
+          >
+            ← Back
+          </button>
+
+          <button
+            className="notification-list-btn notification-list-add"
+            onClick={() => navigate("/admin/notifications/add")}
+          >
+            + Add Notification
+          </button>
+
+        </div>
+      </div>
+
+      <div className="notification-list-table-wrapper">
+
+        <table className="notification-list-table">
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Target</th> {/* 🔥 NEW */}
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {notifications.map((n) => (
+              <tr key={n.id}>
+                <td>{n.id}</td>
+                <td>{n.title}</td>
+
+                <td>
+                  <span className="target-badge">
+                    {n.target}
+                  </span>
+                </td>
+
+                <td>
+                  <div className="notification-list-action-btns">
+
+                    <button
+                      className="notification-list-btn notification-list-edit"
+                      onClick={() => navigate(`/admin/notifications/edit/${n.id}`)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="notification-list-btn notification-list-delete"
+                      onClick={() => handleDelete(n.id)}
+                    >
+                      Remove
+                    </button>
+
+                  </div>
+                </td>
+
+              </tr>
+            ))}
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default NotificationsList;

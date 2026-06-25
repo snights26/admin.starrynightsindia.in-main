@@ -1,0 +1,127 @@
+.admin-grid-container {
+  background: var(--app-surface-gradient, #ffffff);
+  color: var(--app-text, #111827);
+  border: 1px solid var(--app-border, #e5e7eb);
+  box-shadow: var(--app-shadow, 0 14px 34px rgba(15, 23, 42, 0.12));
+  padding: 16px 16px 14px;
+  border-radius: 14px;
+  margin-top: 0;
+  width: 100%;
+  max-width: 1350px;
+  margin-left: auto;
+  margin-right: auto;
+  max-height: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.grid-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--app-accent, #e50914);
+}
+
+.grid-search {
+  width: 260px;
+  padding: 10px 12px;
+  font-size: 13px;
+  background: var(--app-input, #ffffff);
+  border: 1px solid var(--app-input-border, #d1d5db);
+  color: var(--app-text, #111827);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.grid-search::placeholder {
+  color: var(--app-text-muted, #64748b);
+}
+
+.grid-search:focus {
+  border-color: var(--app-accent, #e50914);
+  box-shadow: var(--app-focus, 0 0 0 3px rgba(229, 9, 20, 0.18));
+}
+
+.categories-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  padding: 2px 8px 8px 0;
+}
+
+.categories-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.categories-grid::-webkit-scrollbar-track {
+  background: var(--app-card-soft, #f1f5f9);
+  border-radius: 999px;
+}
+
+.categories-grid::-webkit-scrollbar-thumb {
+  background: var(--app-accent, #e50914);
+  border-radius: 999px;
+}
+
+@media (max-width: 1200px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-grid-container {
+    padding: 14px;
+    min-height: 360px;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .grid-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-grid-container {
+    padding: 12px;
+    min-height: 320px;
+  }
+
+  .grid-title {
+    font-size: 16px;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
