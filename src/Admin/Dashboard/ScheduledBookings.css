@@ -17,6 +17,8 @@
   border:1px solid var(--app-border, transparent);
   min-width:0;
   overflow:auto;
+  scroll-behavior:smooth;
+  overscroll-behavior:contain;
 }
 
 /* NEW HEADER */
@@ -64,6 +66,7 @@
 /* TABLE */
 .schedule-table table{
   width:100%;
+  min-width:620px;
   border-collapse:collapse;
   color:var(--app-text, #ffffff);
 }
@@ -123,7 +126,32 @@
   color:var(--app-text, #ffffff);
   border:1px solid var(--app-border, transparent);
   min-width:250px;
-  overflow:hidden;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.calendar-scroll{
+  min-height:0;
+  overflow:auto;
+  scroll-behavior:smooth;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--app-accent, #e50914) var(--app-card-soft, #111111);
+}
+
+.calendar-scroll::-webkit-scrollbar{
+  width:6px;
+  height:6px;
+}
+
+.calendar-scroll::-webkit-scrollbar-thumb{
+  background:var(--app-accent, #e50914);
+  border-radius:999px;
+}
+
+.calendar-scroll::-webkit-scrollbar-track{
+  background:var(--app-card-soft, #111111);
 }
 
 /* ================= */
@@ -137,6 +165,7 @@
   color:var(--app-text, #ffffff);
   font-family:inherit;
   font-size:12px;
+  min-width:280px;
 }
 
 /* calendar header */
