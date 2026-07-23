@@ -106,7 +106,7 @@ function ScheduledBookings() {
 
       <div className="calendar-box">
         <h3>Tour Calendar</h3>
-        <div className="calendar-scroll" tabIndex="0" aria-label="Tour calendar">
+        <div className="calendar-scroll">
           <Calendar onChange={(date) => setSelectedDate(date)} value={selectedDate} />
         </div>
       </div>

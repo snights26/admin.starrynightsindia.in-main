@@ -64,7 +64,7 @@
 .dbx-left {
   min-width: 0;
   display: grid;
-  grid-template-rows: 240px minmax(0, 1fr);
+  grid-template-rows: 340px minmax(0, 1fr);
   gap: 16px;
   height: 100%;
 }
@@ -172,7 +172,8 @@ html[data-theme="dark"] .dbx-wrapper {
 
   .dbx-scroll {
     height: auto;
-    max-height: 320px;
+    max-height: none;
+    overflow: visible;
   }
 }
 
