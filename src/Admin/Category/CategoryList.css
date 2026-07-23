@@ -47,6 +47,86 @@
 
 
 /* ========================= */
+/* FILTERS */
+/* ========================= */
+
+.category-list-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(230px, 1.35fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #131313;
+  border: 1px solid #1f1f1f;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.category-filter-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.category-filter-field span {
+  color: #8d8d8d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.category-filter-field select,
+.category-filter-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #2b2b2b;
+  border-radius: 8px;
+  outline: none;
+  background: #0d0d0d;
+  color: #f2f2f2;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-filter-field select:focus,
+.category-filter-field input:focus {
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.12);
+}
+
+.category-filter-field input::placeholder {
+  color: #696969;
+}
+
+.category-filter-clear {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid #363636;
+  border-radius: 8px;
+  background: transparent;
+  color: #d5d5d5;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.category-filter-clear:hover:not(:disabled) {
+  border-color: #e50914;
+  background: rgba(229, 9, 20, 0.12);
+  color: #ffffff;
+}
+
+.category-filter-clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+
+/* ========================= */
 /* ADD BUTTON */
 /* ========================= */
 
@@ -132,6 +212,12 @@
 
 .category-list-table tbody tr:hover {
   background: #181818;
+}
+
+.category-list-empty {
+  padding: 32px 14px !important;
+  color: #8d8d8d !important;
+  text-align: center;
 }
 
 
@@ -281,6 +367,15 @@
 
   .category-list-header {
     align-items: stretch;
+  }
+
+  .category-list-filters {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .category-filter-clear {
+    width: 100%;
   }
 
 }

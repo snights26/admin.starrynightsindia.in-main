@@ -1,11 +1,20 @@
 import "./CategoryList.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+
+const isSubcategory = (category) => Boolean(category.isSub || category.isSubcategory);
+
+const categoryCode = (category) => category.code || category.categoryCode || "";
+
+const categoryName = (category) => category.name || category.categoryName || category.title || "";
 
 function CategoryList() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [parentFilter, setParentFilter] = useState("");
+  const [subcategoryFilter, setSubcategoryFilter] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -31,6 +40,49 @@ function CategoryList() {
     }
   };
 
+  const parentCategories = useMemo(
+    () => categories.filter((category) => !isSubcategory(category)),
+    [categories]
+  );
+
+  const parentNamesByCode = useMemo(
+    () => new Map(parentCategories.map((category) => [categoryCode(category), categoryName(category)])),
+    [parentCategories]
+  );
+
+  const subcategoryOptions = useMemo(
+    () => categories.filter((category) => (
+      isSubcategory(category)
+      && (!parentFilter || category.parent === parentFilter)
+    )),
+    [categories, parentFilter]
+  );
+
+  const filteredCategories = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
+
+    return categories.filter((category) => {
+      const code = categoryCode(category);
+      const subcategory = isSubcategory(category);
+      const parentName = subcategory
+        ? parentNamesByCode.get(category.parent) || ""
+        : categoryName(category);
+      const subcategoryName = subcategory ? categoryName(category) : "";
+      const matchesParent = !parentFilter || (subcategory && category.parent === parentFilter);
+      const matchesSubcategory = !subcategoryFilter || code === subcategoryFilter;
+      const matchesSearch = !searchTerm || [parentName, subcategoryName]
+        .some((name) => name.toLowerCase().includes(searchTerm));
+
+      return matchesParent && matchesSubcategory && matchesSearch;
+    });
+  }, [categories, parentFilter, parentNamesByCode, search, subcategoryFilter]);
+
+  const clearFilters = () => {
+    setParentFilter("");
+    setSubcategoryFilter("");
+    setSearch("");
+  };
+
   return (
     <div className="category-list-page">
       <div className="category-list-header">
@@ -49,6 +101,57 @@ function CategoryList() {
         </div>
       </div>
 
+      <div className="category-list-filters" aria-label="Category filters">
+        <label className="category-filter-field">
+          <span>Parent Category</span>
+          <select
+            value={parentFilter}
+            onChange={(event) => {
+              setParentFilter(event.target.value);
+              setSubcategoryFilter("");
+            }}
+          >
+            <option value="">All Parent Categories</option>
+            {parentCategories.map((category) => (
+              <option key={categoryCode(category)} value={categoryCode(category)}>
+                {categoryName(category)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="category-filter-field">
+          <span>Sub Category</span>
+          <select value={subcategoryFilter} onChange={(event) => setSubcategoryFilter(event.target.value)}>
+            <option value="">All Subcategories</option>
+            {subcategoryOptions.map((category) => (
+              <option key={categoryCode(category)} value={categoryCode(category)}>
+                {categoryName(category)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="category-filter-field category-search-field">
+          <span>Search Categories</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search parent or subcategory..."
+          />
+        </label>
+
+        <button
+          type="button"
+          className="category-filter-clear"
+          onClick={clearFilters}
+          disabled={!parentFilter && !subcategoryFilter && !search}
+        >
+          Clear Filters
+        </button>
+      </div>
+
       <div className="category-list-table-wrapper">
         <table className="category-list-table">
           <thead>
@@ -62,7 +165,11 @@ function CategoryList() {
           </thead>
 
           <tbody>
-            {categories.map((c) => (
+            {filteredCategories.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="category-list-empty">No categories found</td>
+              </tr>
+            ) : filteredCategories.map((c) => (
               <tr key={c.code}>
                 <td className="code">{c.code}</td>
                 <td className="name">{c.name}</td>
