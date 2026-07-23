@@ -5,6 +5,8 @@ import api from "../Utils/api";
 import "./ShowCategory.css";
 import { FiTrash2 } from "react-icons/fi";
 
+const PACKAGE_PAGE_SIZE = 20;
+
 export default function ShowCategory() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,6 +22,9 @@ export default function ShowCategory() {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState("");
   const [selected, setSelected] = useState([]);
+  const [packageSearch, setPackageSearch] = useState("");
+  const [packagePage, setPackagePage] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
 
   const showToast = (message) => {
     setToast(message);
@@ -65,6 +70,11 @@ export default function ShowCategory() {
   };
 
   const handleAdd = async () => {
+    if (selected.length === 0 || isAdding) {
+      return;
+    }
+
+    setIsAdding(true);
     try {
       let latest = packages;
       for (const packageCode of selected) {
@@ -80,6 +90,21 @@ export default function ShowCategory() {
     } catch (error) {
       console.error("Failed to add packages", error);
       showToast("Could not add package");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const openPackageSelector = () => {
+    setSelected([]);
+    setPackageSearch("");
+    setPackagePage(1);
+    setShowModal(true);
+  };
+
+  const closePackageSelector = () => {
+    if (!isAdding) {
+      setShowModal(false);
     }
   };
 
@@ -92,7 +117,41 @@ export default function ShowCategory() {
     (p.name || p.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const availablePackages = allPackages.filter((p) => !existingCodes.has(p.packageCode || p.code || p.id));
+  const availablePackages = useMemo(
+    () => allPackages.filter((p) => !existingCodes.has(p.packageCode || p.code || p.id)),
+    [allPackages, existingCodes]
+  );
+
+  const filteredAvailablePackages = useMemo(() => {
+    const query = packageSearch.trim().toLowerCase();
+    if (!query) {
+      return availablePackages;
+    }
+
+    return availablePackages.filter((pkg) => {
+      const packageCode = pkg.packageCode || pkg.code || pkg.id || "";
+      const packageName = pkg.name || pkg.title || "";
+      return packageCode.toLowerCase().includes(query) || packageName.toLowerCase().includes(query);
+    });
+  }, [availablePackages, packageSearch]);
+
+  const totalPackagePages = Math.max(1, Math.ceil(filteredAvailablePackages.length / PACKAGE_PAGE_SIZE));
+  const currentPackagePage = Math.min(packagePage, totalPackagePages);
+  const currentPagePackages = filteredAvailablePackages.slice(
+    (currentPackagePage - 1) * PACKAGE_PAGE_SIZE,
+    currentPackagePage * PACKAGE_PAGE_SIZE
+  );
+  const currentPageCodes = currentPagePackages.map((pkg) => pkg.packageCode || pkg.code || pkg.id);
+  const isCurrentPageSelected = currentPageCodes.length > 0 && currentPageCodes.every((code) => selected.includes(code));
+
+  const toggleCurrentPage = () => {
+    setSelected((previous) => {
+      if (isCurrentPageSelected) {
+        return previous.filter((code) => !currentPageCodes.includes(code));
+      }
+      return [...new Set([...previous, ...currentPageCodes])];
+    });
+  };
 
   return (
     <div className="category-page">
@@ -108,7 +167,7 @@ export default function ShowCategory() {
           </div>
         </div>
 
-        <button className="add-btn" onClick={() => setShowModal(true)}>
+        <button className="add-btn" onClick={openPackageSelector}>
           + Add Packages
         </button>
       </div>
@@ -145,10 +204,44 @@ export default function ShowCategory() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h3>Select Packages</h3>
+            <div className="package-selector-header">
+              <div>
+                <h3>Select Packages</h3>
+                <span>{filteredAvailablePackages.length} available · {selected.length} selected</span>
+              </div>
+              <button type="button" className="package-selector-close" onClick={closePackageSelector} disabled={isAdding}>
+                ×
+              </button>
+            </div>
+
+            <input
+              type="search"
+              className="package-selector-search"
+              placeholder="Search by package name or code..."
+              value={packageSearch}
+              onChange={(event) => {
+                setPackageSearch(event.target.value);
+                setPackagePage(1);
+              }}
+              autoFocus
+            />
+
+            <div className="package-selector-toolbar">
+              <span>Page {currentPackagePage} of {totalPackagePages}</span>
+              <button
+                type="button"
+                className="package-selector-page-select"
+                onClick={toggleCurrentPage}
+                disabled={currentPagePackages.length === 0 || isAdding}
+              >
+                {isCurrentPageSelected ? "Clear page" : "Select page"}
+              </button>
+            </div>
 
             <div className="package-list">
-              {availablePackages.map((p) => {
+              {currentPagePackages.length === 0 ? (
+                <div className="package-list-empty">No available packages match your search.</div>
+              ) : currentPagePackages.map((p) => {
                 const packageCode = p.packageCode || p.code || p.id;
                 return (
                   <label key={packageCode} className="checkbox-row">
@@ -156,19 +249,38 @@ export default function ShowCategory() {
                       type="checkbox"
                       checked={selected.includes(packageCode)}
                       onChange={() => handleSelect(packageCode)}
+                      disabled={isAdding}
                     />
-                    {p.name || p.title}
+                    <span>{p.name || p.title}</span>
+                    <small>{packageCode}</small>
                   </label>
                 );
               })}
             </div>
 
+            <div className="package-selector-pagination">
+              <button
+                type="button"
+                onClick={() => setPackagePage((page) => Math.max(1, page - 1))}
+                disabled={currentPackagePage === 1 || isAdding}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPackagePage((page) => Math.min(totalPackagePages, page + 1))}
+                disabled={currentPackagePage === totalPackagePages || isAdding}
+              >
+                Next
+              </button>
+            </div>
+
             <div className="modal-actions">
-              <button className="submit-btn" onClick={handleAdd}>
-                Submit
+              <button className="submit-btn" onClick={handleAdd} disabled={selected.length === 0 || isAdding}>
+                {isAdding ? "Adding..." : `Add ${selected.length || "Selected"} Package${selected.length === 1 ? "" : "s"}`}
               </button>
 
-              <button className="close-btn" onClick={() => setShowModal(false)}>
+              <button className="close-btn" onClick={closePackageSelector} disabled={isAdding}>
                 Cancel
               </button>
             </div>
