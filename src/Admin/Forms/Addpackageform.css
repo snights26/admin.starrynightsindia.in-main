@@ -192,161 +192,129 @@
 /* CATEGORY */
 /* ======================= */
 
-.pkg-form .category-dynamic {
+.pkg-form .package-category-selector {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: minmax(210px, 1fr) minmax(240px, 1.15fr) minmax(260px, 1.25fr);
   gap: 14px;
+  align-items: stretch;
 }
 
-/* CARD */
-
-.pkg-form .category-card {
-  background: linear-gradient(180deg, #141414 0%, #101010 100%);
-  border: 1px solid #252525;
-  border-radius: 12px;
+.pkg-form .package-category-field,
+.pkg-form .selected-subcategories-panel {
+  min-width: 0;
+  background: linear-gradient(180deg, #151515 0%, #101010 100%);
+  border: 1px solid #282828;
+  border-radius: 10px;
   padding: 12px;
-  display: flex;
-  flex-direction: column;
-  min-height: 220px;
-  transition: 0.25s ease;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
 }
 
-.pkg-form .category-card:hover {
-  border-color: #e50914;
-  transform: translateY(-2px);
-}
-
-.pkg-form .category-card.explorer-region-card {
-  border-color: rgba(229, 9, 20, 0.5);
-  box-shadow: 0 12px 28px rgba(229, 9, 20, 0.12);
-}
-
-/* HEADER */
-
-.pkg-form .category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #222;
-}
-
-.pkg-form .category-header span {
-  display: flex;
-  align-items: center;
+.pkg-form .package-category-field {
+  display: grid;
+  align-content: start;
   gap: 8px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: 0.3px;
 }
 
-.pkg-form .category-header span em {
-  padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(229, 9, 20, 0.16);
-  color: #ff6b75;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.pkg-form .category-header input {
-  width: 120px;
-  padding: 7px 10px;
-  font-size: 11px;
-  border-radius: 6px;
-  background: #0c0c0c;
-  border: 1px solid #2d2d2d;
-  color: white;
-}
-
-.pkg-form .category-header input:focus {
-  border-color: #e50914;
-  outline: none;
-}
-
-/* STICKY */
-
-.pkg-form .category-header.sticky {
-  position: sticky;
-  top: 0;
-  background: #111;
-  z-index: 2;
-}
-
-/* OPTIONS */
-
-.pkg-form .category-options {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 8px;
-  max-height: 160px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-/* SCROLLBAR */
-
-.pkg-form .category-options::-webkit-scrollbar {
-  width: 5px;
-}
-
-.pkg-form .category-options::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.pkg-form .category-options::-webkit-scrollbar-thumb {
-  background: #e50914;
-  border-radius: 20px;
-}
-
-/* OPTION */
-
-.pkg-form .option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  background: #1a1a1a;
-  border: 1px solid #2c2c2c;
-  border-radius: 30px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: 0.22s ease;
-  user-select: none;
-  color: #d5d5d5;
-  font-weight: 500;
-}
-
-.pkg-form .option small {
-  color: #8f98a8;
-  font-size: 9px;
+.pkg-form .package-category-field > span,
+.pkg-form .selected-subcategories-title {
+  color: #f3f3f3;
+  font-size: 12px;
   font-weight: 700;
 }
 
-.pkg-form .option:hover {
-  background: #232323;
-  border-color: #444;
-  color: white;
+.pkg-form .package-category-field .react-select__control {
+  min-height: 39px;
+  background: #0d0d0d;
+  border-color: #303030;
 }
 
-.pkg-form .option.active {
-  background: #e50914;
+.pkg-form .package-category-field .react-select__control--is-focused {
   border-color: #e50914;
-  color: white;
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.35);
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.12);
 }
 
-.pkg-form .option.active small {
-  color: rgba(255, 255, 255, 0.78);
+.pkg-form .package-category-field .react-select__placeholder {
+  color: #8f8f8f;
+}
+
+.pkg-form .package-category-field .react-select__single-value,
+.pkg-form .package-category-field .react-select__input-container,
+.pkg-form .package-category-field .react-select__indicator {
+  color: #f4f4f4;
+}
+
+.pkg-form .package-category-field .react-select__menu {
+  z-index: 5;
+  overflow: hidden;
+  border: 1px solid #303030;
+  background: #151515;
+}
+
+.pkg-form .package-category-field .react-select__option {
+  color: #ececec;
+}
+
+.pkg-form .package-category-field .react-select__option--is-focused {
+  background: rgba(229, 9, 20, 0.14);
+}
+
+.pkg-form .package-category-field .react-select__option--is-selected {
+  background: #e50914;
+  color: #ffffff;
+}
+
+.pkg-form .package-category-field .react-select__control--is-disabled {
+  opacity: 0.56;
+}
+
+.pkg-form .selected-subcategories-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.pkg-form .selected-subcategories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.pkg-form .selected-subcategory-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 6px 8px 6px 10px;
+  border: 1px solid rgba(229, 9, 20, 0.42);
+  border-radius: 999px;
+  background: rgba(229, 9, 20, 0.12);
+  color: #f7dadd;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.pkg-form .selected-subcategory-chip button {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.pkg-form .selected-subcategory-chip button:hover {
+  background: #e50914;
+}
+
+.pkg-form .selected-subcategories-empty {
+  margin: 0;
+  color: #858585;
+  font-size: 12px;
 }
 
 /* ======================= */
@@ -355,33 +323,14 @@
 
 @media (max-width:768px){
 
-  .pkg-form .category-dynamic {
+  .pkg-form .package-category-selector {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  .pkg-form .category-card {
-  
+  .pkg-form .package-category-field,
+  .pkg-form .selected-subcategories-panel {
     padding: 11px;
-  }
-
-  .pkg-form .category-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .pkg-form .category-header input {
-    width: 100%;
-  }
-
-  .pkg-form .category-options {
-    max-height: none;
-    overflow: visible;
-  }
-
-  .pkg-form .option {
-    font-size: 10px;
-    padding: 6px 10px;
   }
 
 }

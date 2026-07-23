@@ -1,8 +1,17 @@
 import "./Addpackageform.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 import api from "../../Utils/api";
 import { resolveAssetUrl, uploadFile } from "../../Utils/fileUpload";
+
+const categoryCode = (category = {}) => category.code || category.categoryCode || category.id || "";
+
+const categoryName = (category = {}) => category.name || category.categoryName || category.title || "";
+
+const parentCodeOf = (category = {}) => category.parent && category.parent !== "-" ? category.parent : "";
+
+const isSubcategory = (category = {}) => Boolean(category.isSub || category.isSubcategory || parentCodeOf(category));
 
 function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
   const navigate = useNavigate();
@@ -28,6 +37,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
 
   const [form, setForm] = useState(initialState);
   const [categories, setCategories] = useState([]);
+  const [selectedParentCode, setSelectedParentCode] = useState("");
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -65,13 +75,20 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
   useEffect(() => {
     if (mode !== "edit" || !data?.categoryCodes?.length || !categories.length) return;
     const grouped = {};
+    let firstParentCode = "";
+
     data.categoryCodes.forEach((code) => {
-      const category = categories.find((cat) => (cat.code || cat.categoryCode || cat.id) === code);
-      const parentCode = category?.parent && category.parent !== "-" ? category.parent : code;
+      const category = categories.find((cat) => categoryCode(cat) === code);
+      const parentCode = parentCodeOf(category) || code;
       grouped[parentCode] = grouped[parentCode] || [];
       grouped[parentCode].push(code);
+      if (!firstParentCode && categories.some((cat) => categoryCode(cat) === parentCode && !isSubcategory(cat))) {
+        firstParentCode = parentCode;
+      }
     });
+
     setForm((prev) => ({ ...prev, selectedCategories: grouped }));
+    setSelectedParentCode(firstParentCode);
   }, [categories, data, mode]);
 
   useEffect(() => {
@@ -92,9 +109,9 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
   const groupedCategories = useMemo(() => {
     const groups = {};
     categories.forEach((cat) => {
-      const code = cat.code || cat.categoryCode || cat.id;
-      const parent = cat.parent && cat.parent !== "-" ? cat.parent : "";
-      const isSub = cat.isSub || cat.isSubcategory || Boolean(parent);
+      const code = categoryCode(cat);
+      const parent = parentCodeOf(cat);
+      const isSub = isSubcategory(cat);
       if (!isSub) {
         groups[code] = groups[code] || { parent: cat, children: [] };
         groups[code].parent = cat;
@@ -106,26 +123,63 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     return groups;
   }, [categories]);
 
+  const parentOptions = useMemo(
+    () => Object.entries(groupedCategories)
+      .filter(([, group]) => group.parent)
+      .map(([value, group]) => ({ value, label: `${categoryName(group.parent)} - ${value}` })),
+    [groupedCategories]
+  );
+
+  const selectedParentOption = parentOptions.find((option) => option.value === selectedParentCode) || null;
+
+  const subcategoryOptions = useMemo(
+    () => (groupedCategories[selectedParentCode]?.children || []).map((category) => ({
+      value: categoryCode(category),
+      label: `${categoryName(category)} - ${categoryCode(category)}`
+    })),
+    [groupedCategories, selectedParentCode]
+  );
+
+  const selectedSubcategoryOptions = useMemo(() => {
+    const selectedCodes = new Set(form.selectedCategories[selectedParentCode] || []);
+    return subcategoryOptions.filter((option) => selectedCodes.has(option.value));
+  }, [form.selectedCategories, selectedParentCode, subcategoryOptions]);
+
   const brandOptions = ["Holidays", "Adventures", "GroupTour"];
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCategoryChange = (parentCode, childCode) => {
+  const handleParentChange = (option) => {
+    setSelectedParentCode(option?.value || "");
+    setForm((prev) => ({ ...prev, selectedCategories: {} }));
+  };
+
+  const handleSubcategoryChange = (options) => {
+    if (!selectedParentCode) return;
+
+    const selectedCodes = Array.from(new Set((options || []).map((option) => option.value)));
     setForm((prev) => {
-      const prevSelected = prev.selectedCategories[parentCode] || [];
-      const selected = prevSelected.includes(childCode)
-        ? prevSelected.filter((id) => id !== childCode)
-        : [...prevSelected, childCode];
       return {
         ...prev,
         selectedCategories: {
           ...prev.selectedCategories,
-          [parentCode]: selected
+          [selectedParentCode]: selectedCodes
         }
       };
     });
+  };
+
+  const removeSelectedSubcategory = (childCode) => {
+    setForm((prev) => ({
+      ...prev,
+      selectedCategories: {
+        ...prev.selectedCategories,
+        [selectedParentCode]: (prev.selectedCategories[selectedParentCode] || [])
+          .filter((code) => code !== childCode)
+      }
+    }));
   };
 
   const handleHeroImageChange = (index, file) => {
@@ -147,7 +201,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
   };
 
   const handleSubmit = async () => {
-    const categoryCodes = Object.values(form.selectedCategories).flat();
+    const categoryCodes = Array.from(new Set(Object.values(form.selectedCategories).flat()));
     const heroImages = await Promise.all(
       form.heroImages.filter(Boolean).map((img) => uploadFile(img, "packages"))
     );
@@ -187,43 +241,6 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     }
   };
 
-  const CategoryBlock = ({ group, selected, onChange }) => {
-    const [search, setSearch] = useState("");
-    const parentCode = group.parent?.code || group.parent?.categoryCode || group.parent?.id;
-    const isExplorerRegion = parentCode === "DOM" || parentCode === "INT";
-    const filtered = group.children.filter((child) =>
-      (child.name || child.title || "").toLowerCase().includes(search.toLowerCase())
-    );
-
-    return (
-      <div className={`category-card ${isExplorerRegion ? "explorer-region-card" : ""}`}>
-        <div className="category-header sticky">
-          <span>
-            {group.parent?.name || group.parent?.title}
-            {isExplorerRegion && <em>Global Explorer</em>}
-          </span>
-          <input type="text" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-
-        <div className="category-options">
-          {filtered.map((child) => {
-            const childCode = child.code || child.categoryCode || child.id;
-            return (
-              <div
-                key={childCode}
-                className={`option ${selected.includes(childCode) ? "active" : ""}`}
-                onClick={() => onChange(parentCode, childCode)}
-              >
-                <span>{child.name || child.title}</span>
-                <small>{childCode}</small>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="pkg-form">
       <div className="form-section">
@@ -245,19 +262,62 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       <div className="form-section">
         <h3>Categories</h3>
         <p className="category-help">
-          Select a Domestic or International region to make this package appear in Starry Nights Global Explorer map results.
+          Choose a parent category, then select one or more of its subcategories for this package.
         </p>
-        <div className="category-dynamic">
-          {Object.values(groupedCategories).map((group) => (
-            group.parent && (
-              <CategoryBlock
-                key={group.parent.code || group.parent.id}
-                group={group}
-                selected={form.selectedCategories[group.parent.code || group.parent.categoryCode || group.parent.id] || []}
-                onChange={handleCategoryChange}
-              />
-            )
-          ))}
+        <div className="package-category-selector">
+          <label className="package-category-field">
+            <span>Parent Category</span>
+            <Select
+              options={parentOptions}
+              value={selectedParentOption}
+              onChange={handleParentChange}
+              placeholder="Search and select a parent category"
+              isClearable
+              isSearchable
+              classNamePrefix="react-select"
+            />
+          </label>
+
+          <label className="package-category-field">
+            <span>Subcategories</span>
+            <Select
+              options={subcategoryOptions}
+              value={selectedSubcategoryOptions}
+              onChange={handleSubcategoryChange}
+              placeholder={selectedParentCode ? "Search and select subcategories" : "Select a parent category first"}
+              isDisabled={!selectedParentCode}
+              isMulti
+              isSearchable
+              closeMenuOnSelect={false}
+              controlShouldRenderValue={false}
+              noOptionsMessage={() => selectedParentCode ? "No subcategories available" : "Select a parent category first"}
+              classNamePrefix="react-select"
+            />
+          </label>
+
+          <div className="selected-subcategories-panel">
+            <span className="selected-subcategories-title">Selected Subcategories</span>
+            {selectedSubcategoryOptions.length > 0 ? (
+              <div className="selected-subcategories-list">
+                {selectedSubcategoryOptions.map((option) => (
+                  <span key={option.value} className="selected-subcategory-chip">
+                    {option.label}
+                    <button
+                      type="button"
+                      onClick={() => removeSelectedSubcategory(option.value)}
+                      aria-label={`Remove ${option.label}`}
+                    >
+                      x
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="selected-subcategories-empty">
+                {selectedParentCode ? "No subcategories selected" : "Select a parent category first"}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
