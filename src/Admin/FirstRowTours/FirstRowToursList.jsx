@@ -80,9 +80,10 @@ function FirstRowToursList() {
   return (
     <div className="fr-page">
       <div className="fr-header">
-        <div>
+        <div className="fr-title-block">
+          <span className="fr-eyebrow">Homepage curation</span>
           <h1>First Row Tours</h1>
-          <p>Manage highlighted packages for homepage</p>
+          <p>Curate the packages visitors see first on the homepage.</p>
         </div>
 
         <button className="fr-back-btn" onClick={() => navigate("/dashboard")}>
@@ -91,6 +92,10 @@ function FirstRowToursList() {
       </div>
 
       <div className="fr-add-card">
+        <div className="fr-add-intro">
+          <span>Build the collection</span>
+          <p>Search the package catalog and add a new highlight.</p>
+        </div>
         <Select
           className="fr-select"
           classNamePrefix="fr"
@@ -107,6 +112,13 @@ function FirstRowToursList() {
       </div>
 
       <div className="fr-table-card">
+        <div className="fr-table-heading">
+          <div>
+            <span>Featured package lineup</span>
+            <p>Packages are displayed on the homepage in this order.</p>
+          </div>
+          <span className="fr-count-badge">{selectedList.length} featured</span>
+        </div>
         <table className="fr-table">
           <thead>
             <tr>
@@ -117,17 +129,21 @@ function FirstRowToursList() {
           </thead>
 
           <tbody>
-            {selectedList.map((item, index) => (
+            {selectedList.length > 0 ? selectedList.map((item, index) => (
               <tr key={codeOf(item)}>
-                <td>{index + 1}</td>
-                <td>{item.title || item.name}</td>
+                <td><span className="fr-row-number">{String(index + 1).padStart(2, "0")}</span></td>
+                <td><span className="fr-package-name">{item.title || item.name}</span></td>
                 <td>
                   <button className="fr-remove-btn" onClick={() => handleRemove(codeOf(item))}>
-                    Remove
+                    Remove from row
                   </button>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr className="fr-empty-row">
+                <td colSpan="3">No featured packages yet. Add one above to begin curating the homepage.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

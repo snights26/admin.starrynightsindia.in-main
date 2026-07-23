@@ -284,16 +284,17 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       <div className="form-section">
         <h3>Categories</h3>
         <p className="category-help">
-          Choose a parent category, then select one or more of its subcategories. You can switch parents without losing existing selections.
+          Build the package taxonomy in three steps. You can switch parent categories at any time without losing earlier selections.
         </p>
         <div className="package-category-selector">
           <label className="package-category-field">
-            <span>Parent Category</span>
+            <span className="package-category-label"><b>01</b> Parent Category</span>
+            <small>Choose where to browse</small>
             <Select
               options={parentOptions}
               value={selectedParentOption}
               onChange={handleParentChange}
-              placeholder="Search and select a parent category"
+              placeholder="Search parent categories"
               isClearable
               isSearchable
               classNamePrefix="react-select"
@@ -301,12 +302,13 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
           </label>
 
           <label className="package-category-field">
-            <span>Subcategories</span>
+            <span className="package-category-label"><b>02</b> Subcategories</span>
+            <small>Choose one or more matches</small>
             <Select
               options={subcategoryOptions}
               value={activeSelectedSubcategoryOptions}
               onChange={handleSubcategoryChange}
-              placeholder={selectedParentCode ? "Search and select subcategories" : "Select a parent category first"}
+              placeholder={selectedParentCode ? "Search subcategories" : "Select a parent category first"}
               isDisabled={!selectedParentCode}
               isMulti
               isSearchable
@@ -318,7 +320,10 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
           </label>
 
           <div className="selected-subcategories-panel">
-            <span className="selected-subcategories-title">Selected Subcategories</span>
+            <div className="selected-subcategories-heading">
+              <span className="selected-subcategories-title"><b>03</b> Selected Subcategories</span>
+              <span className="selected-subcategories-count" aria-live="polite">{allSelectedSubcategories.length}</span>
+            </div>
             {allSelectedSubcategories.length > 0 ? (
               <div className="selected-subcategories-list">
                 {allSelectedSubcategories.map((option) => (
@@ -337,7 +342,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
               </div>
             ) : (
               <p className="selected-subcategories-empty">
-                Select a parent category to begin choosing subcategories
+                Your selected subcategories will appear here.
               </p>
             )}
           </div>
