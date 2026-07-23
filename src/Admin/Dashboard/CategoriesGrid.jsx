@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CategoryCard from "../../Common/CategoryCard";
 import api from "../../Utils/api";
-import { resolveAssetUrl } from "../../Utils/fileUpload";
 import "./CategoriesGrid.css";
+
+const categoryName = (category) => category?.title || category?.name || "";
 
 export default function CategoriesGrid() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
-  const [expandedCategories, setExpandedCategories] = useState(() => new Set());
+  const [selectedParentCode, setSelectedParentCode] = useState(null);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -25,101 +25,114 @@ export default function CategoriesGrid() {
     loadCategories();
   }, []);
 
-  const handleClick = (cat) => {
-    navigate(`/admin/category/${cat.code}`, {
-      state: {
-        categoryName: cat.title || cat.name,
-        categoryCode: cat.code
-      }
-    });
-  };
+  const selectedParent = useMemo(
+    () => categories.find((category) => category.code === selectedParentCode) || null,
+    [categories, selectedParentCode]
+  );
 
-  const toggleCategory = (code) => {
-    setExpandedCategories((previous) => {
-      const next = new Set(previous);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
-      return next;
-    });
-  };
+  const visibleCategories = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const source = selectedParent
+      ? (Array.isArray(selectedParent.children) ? selectedParent.children : [])
+      : categories;
 
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredCategories = useMemo(() => categories.reduce((result, category) => {
-    const children = Array.isArray(category.children) ? category.children : [];
-    const matchesParent = (category.title || category.name || "").toLowerCase().includes(normalizedSearch);
-    const matchingChildren = children.filter((child) =>
-      (child.title || child.name || "").toLowerCase().includes(normalizedSearch)
-    );
-
-    if (!normalizedSearch || matchesParent || matchingChildren.length > 0) {
-      result.push({
-        category,
-        children: normalizedSearch && !matchesParent ? matchingChildren : children,
-        showSearchResults: normalizedSearch && matchingChildren.length > 0
-      });
+    if (!query) {
+      return source;
     }
 
-    return result;
-  }, []), [categories, normalizedSearch]);
+    return source.filter((category) => categoryName(category).toLowerCase().includes(query));
+  }, [categories, search, selectedParent]);
+
+  const openSubcategory = (category) => {
+    navigate(`/admin/category/${category.code}`, {
+      state: {
+        categoryName: categoryName(category),
+        categoryCode: category.code
+      }
+    });
+  };
+
+  const selectParent = (category) => {
+    setSelectedParentCode(category.code);
+    setSearch("");
+  };
+
+  const returnToParents = () => {
+    setSelectedParentCode(null);
+    setSearch("");
+  };
+
+  const isSubcategoryView = Boolean(selectedParent);
+  const title = isSubcategoryView
+    ? `${categoryName(selectedParent)} Subcategories`
+    : "Category Management";
 
   return (
     <div className="admin-grid-container">
       <div className="grid-header">
-        <h2 className="grid-title">Category Management</h2>
+        <div>
+          <h2 className="grid-title">{title}</h2>
+          {isSubcategoryView && (
+            <button type="button" className="category-table-back" onClick={returnToParents}>
+              ← All Parent Categories
+            </button>
+          )}
+        </div>
 
         <input
           type="text"
-          placeholder="Search category..."
+          placeholder={isSubcategoryView ? "Search subcategory..." : "Search parent category..."}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="grid-search"
         />
       </div>
 
-      <div className="categories-grid">
-        {filteredCategories.map(({ category, children, showSearchResults }) => {
-          const isExpanded = expandedCategories.has(category.code);
-          const showChildren = isExpanded || showSearchResults;
-
-          return (
-            <section className="category-tree-group" key={category.code}>
-              <div className="category-tree-parent">
-                <CategoryCard
-                  title={category.title || category.name}
-                  image={resolveAssetUrl(category.image || category.thumbnailUrl)}
-                  onClick={() => handleClick(category)}
-                />
-                <button
-                  type="button"
-                  className="category-expand-btn"
-                  onClick={() => toggleCategory(category.code)}
-                  aria-expanded={isExpanded}
-                  disabled={children.length === 0}
+      <div className="category-table-wrapper">
+        <table className="category-dashboard-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>{isSubcategoryView ? "Subcategory" : "Parent Category"}</th>
+              <th>{isSubcategoryView ? "Packages" : "Subcategories"}</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleCategories.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="category-table-empty">
+                  {isSubcategoryView ? "No subcategories found" : "No parent categories found"}
+                </td>
+              </tr>
+            ) : visibleCategories.map((category) => {
+              const children = Array.isArray(category.children) ? category.children : [];
+              return (
+                <tr
+                  key={category.code}
+                  className="category-dashboard-row"
+                  onClick={() => isSubcategoryView ? openSubcategory(category) : selectParent(category)}
                 >
-                  {children.length === 0 ? "No subcategories" : isExpanded ? "Collapse" : "Expand"}
-                </button>
-              </div>
-
-              {showChildren && children.length > 0 && (
-                <div className="category-tree-children">
-                  {children.map((child) => (
-                    <div className="category-tree-child" key={child.code}>
-                      <span className="category-tree-branch" aria-hidden="true" />
-                      <CategoryCard
-                        title={child.title || child.name}
-                        image={resolveAssetUrl(child.image || child.thumbnailUrl)}
-                        onClick={() => handleClick(child)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
+                  <td className="category-table-code">{category.code}</td>
+                  <td className="category-table-name">{categoryName(category)}</td>
+                  <td>{isSubcategoryView ? "Manage packages" : children.length}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="category-table-action"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        isSubcategoryView ? openSubcategory(category) : selectParent(category);
+                      }}
+                    >
+                      {isSubcategoryView ? "Manage Packages" : "View Subcategories"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
