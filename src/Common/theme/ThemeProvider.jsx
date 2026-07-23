@@ -1,19 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { darkTheme } from "./darkTheme";
 import { lightTheme } from "./lightTheme";
-import { getScheduledTheme, THEME_STORAGE_KEY, VALID_THEME_PREFERENCES } from "./themeConfig";
+import { getScheduledTheme } from "./themeConfig";
 
 const ThemeContext = createContext(null);
 const themes = { dark: darkTheme, light: lightTheme };
-
-const getStoredPreference = () => {
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return VALID_THEME_PREFERENCES.includes(stored) ? stored : null;
-  } catch {
-    return null;
-  }
-};
 
 const applyTheme = (theme) => {
   const root = document.documentElement;
@@ -23,7 +14,7 @@ const applyTheme = (theme) => {
 };
 
 export function ThemeProvider({ children }) {
-  const [preference, setPreferenceState] = useState(getStoredPreference);
+  const [preference, setPreferenceState] = useState(null);
   const [scheduledTheme, setScheduledTheme] = useState(getScheduledTheme);
   const activeThemeName = preference || scheduledTheme;
   const activeTheme = themes[activeThemeName] || darkTheme;
@@ -41,11 +32,6 @@ export function ThemeProvider({ children }) {
 
   const setPreference = (nextPreference) => {
     setPreferenceState(nextPreference);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, nextPreference);
-    } catch {
-      // Local storage can be unavailable in restricted browser contexts.
-    }
   };
 
   const toggleTheme = () => {

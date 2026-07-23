@@ -12,7 +12,7 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       aria-pressed={isDark}
-      title={isScheduledTheme ? "Using scheduled theme. Click to save a preference." : "Theme preference saved"}
+      title={isScheduledTheme ? "Using the IST automatic theme. Click to override for this session." : "Session-only theme override"}
     >
       <img
         className="theme-toggle__image"
