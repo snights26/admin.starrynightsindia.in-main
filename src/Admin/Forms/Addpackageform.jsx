@@ -140,10 +140,33 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     [groupedCategories, selectedParentCode]
   );
 
-  const selectedSubcategoryOptions = useMemo(() => {
+  const activeSelectedSubcategoryOptions = useMemo(() => {
     const selectedCodes = new Set(form.selectedCategories[selectedParentCode] || []);
     return subcategoryOptions.filter((option) => selectedCodes.has(option.value));
   }, [form.selectedCategories, selectedParentCode, subcategoryOptions]);
+
+  const allSelectedSubcategories = useMemo(() => {
+    const seenCodes = new Set();
+
+    return Object.entries(form.selectedCategories).flatMap(([parentCode, selectedCodes]) => {
+      const parent = groupedCategories[parentCode]?.parent;
+      const parentName = categoryName(parent) || parentCode;
+
+      return (selectedCodes || []).flatMap((code) => {
+        if (seenCodes.has(code)) return [];
+        seenCodes.add(code);
+        const category = categories.find((item) => categoryCode(item) === code);
+        if (!category) return [];
+
+        return [{
+          code,
+          parentCode,
+          parentName,
+          label: `${categoryName(category)} - ${code}`
+        }];
+      });
+    });
+  }, [categories, form.selectedCategories, groupedCategories]);
 
   const brandOptions = ["Holidays", "Adventures", "GroupTour"];
 
@@ -153,7 +176,6 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
 
   const handleParentChange = (option) => {
     setSelectedParentCode(option?.value || "");
-    setForm((prev) => ({ ...prev, selectedCategories: {} }));
   };
 
   const handleSubcategoryChange = (options) => {
@@ -171,12 +193,12 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     });
   };
 
-  const removeSelectedSubcategory = (childCode) => {
+  const removeSelectedSubcategory = (parentCode, childCode) => {
     setForm((prev) => ({
       ...prev,
       selectedCategories: {
         ...prev.selectedCategories,
-        [selectedParentCode]: (prev.selectedCategories[selectedParentCode] || [])
+        [parentCode]: (prev.selectedCategories[parentCode] || [])
           .filter((code) => code !== childCode)
       }
     }));
@@ -262,7 +284,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       <div className="form-section">
         <h3>Categories</h3>
         <p className="category-help">
-          Choose a parent category, then select one or more of its subcategories for this package.
+          Choose a parent category, then select one or more of its subcategories. You can switch parents without losing existing selections.
         </p>
         <div className="package-category-selector">
           <label className="package-category-field">
@@ -282,7 +304,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
             <span>Subcategories</span>
             <Select
               options={subcategoryOptions}
-              value={selectedSubcategoryOptions}
+              value={activeSelectedSubcategoryOptions}
               onChange={handleSubcategoryChange}
               placeholder={selectedParentCode ? "Search and select subcategories" : "Select a parent category first"}
               isDisabled={!selectedParentCode}
@@ -297,14 +319,15 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
 
           <div className="selected-subcategories-panel">
             <span className="selected-subcategories-title">Selected Subcategories</span>
-            {selectedSubcategoryOptions.length > 0 ? (
+            {allSelectedSubcategories.length > 0 ? (
               <div className="selected-subcategories-list">
-                {selectedSubcategoryOptions.map((option) => (
-                  <span key={option.value} className="selected-subcategory-chip">
-                    {option.label}
+                {allSelectedSubcategories.map((option) => (
+                  <span key={option.code} className="selected-subcategory-chip">
+                    <span className="selected-subcategory-parent">{option.parentName}</span>
+                    <span>{option.label}</span>
                     <button
                       type="button"
-                      onClick={() => removeSelectedSubcategory(option.value)}
+                      onClick={() => removeSelectedSubcategory(option.parentCode, option.code)}
                       aria-label={`Remove ${option.label}`}
                     >
                       x
@@ -314,7 +337,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
               </div>
             ) : (
               <p className="selected-subcategories-empty">
-                {selectedParentCode ? "No subcategories selected" : "Select a parent category first"}
+                Select a parent category to begin choosing subcategories
               </p>
             )}
           </div>
