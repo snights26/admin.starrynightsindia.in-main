@@ -4,6 +4,7 @@ import api from "../../Utils/api";
 import "./CategoriesGrid.css";
 
 const categoryName = (category) => category?.title || category?.name || "";
+const categoryInitial = (category) => categoryName(category).trim().charAt(0).toUpperCase() || "?";
 
 export default function CategoriesGrid() {
   const navigate = useNavigate();
@@ -70,8 +71,12 @@ export default function CategoriesGrid() {
   return (
     <div className="admin-grid-container">
       <div className="grid-header">
-        <div>
-          <h2 className="grid-title">{title}</h2>
+        <div className="grid-heading">
+          <span className="grid-eyebrow">{isSubcategoryView ? "Category Directory" : "Travel Catalogue"}</span>
+          <div className="grid-title-row">
+            <h2 className="grid-title">{title}</h2>
+            <span className="grid-item-count">{visibleCategories.length}</span>
+          </div>
           {isSubcategoryView && (
             <button type="button" className="category-table-back" onClick={returnToParents}>
               ← All Parent Categories
@@ -108,7 +113,9 @@ export default function CategoriesGrid() {
               const children = Array.isArray(category.children) ? category.children : [];
               return (
                 <tr key={category.code} className={isSubcategoryView ? "category-dashboard-row" : ""}>
-                  <td className="category-table-code">{category.code}</td>
+                  <td className="category-table-code">
+                    <span className="category-code-badge">{category.code}</span>
+                  </td>
                   <td>
                     {isSubcategoryView ? (
                       <button
@@ -116,10 +123,14 @@ export default function CategoriesGrid() {
                         className="subcategory-name-link"
                         onClick={() => openSubcategory(category)}
                       >
+                        <span className="category-name-avatar">{categoryInitial(category)}</span>
                         {categoryName(category)}
                       </button>
                     ) : (
-                      <span className="category-table-name">{categoryName(category)}</span>
+                      <span className="category-table-name">
+                        <span className="category-name-avatar">{categoryInitial(category)}</span>
+                        {categoryName(category)}
+                      </span>
                     )}
                   </td>
                   <td>
@@ -133,7 +144,8 @@ export default function CategoriesGrid() {
                         disabled={children.length === 0}
                         aria-label={`View ${children.length} subcategories for ${categoryName(category)}`}
                       >
-                        {children.length}
+                        <span>{children.length}</span>
+                        <span className="subcategory-count-arrow" aria-hidden="true">›</span>
                       </button>
                     )}
                   </td>
