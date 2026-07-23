@@ -103,6 +103,7 @@ function GalleryList() {
               images.map((img) => {
                 const imageId = getImageId(img);
                 const canFeature = canFeatureImage(img);
+                const isUserUpload = String(img.uploadedByType || "").toLowerCase() === "user";
                 return (
                   <tr key={imageId}>
                     <td>{imageId}</td>
@@ -116,10 +117,20 @@ function GalleryList() {
                       />
                     </td>
 
-                    <td>
-                      <span className={img.uploadedByType === "admin" ? "badge-admin" : "badge-user"}>
+                    <td className="gallery-uploader-cell">
+                      <span className={isUserUpload ? "badge-user" : "badge-admin"}>
                         {img.uploadedByType}
                       </span>
+                      {isUserUpload && (
+                        <div className="gallery-uploader-details">
+                          <span className="gallery-uploader-id">
+                            User ID: {img.userId || "Unavailable"}
+                          </span>
+                          {img.userName && (
+                            <span className="gallery-uploader-name">{img.userName}</span>
+                          )}
+                        </div>
+                      )}
                     </td>
 
                     <td>

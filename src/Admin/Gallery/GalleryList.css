@@ -86,7 +86,7 @@
 
 .gallery-list-table {
   width: 100%;
-  min-width: 980px;
+  min-width: 1080px;
   border-collapse: collapse;
 }
 
@@ -189,6 +189,30 @@
 .badge-feature-locked,
 .badge-no-consent {
   opacity: 0.78;
+}
+
+.gallery-uploader-cell {
+  min-width: 150px;
+}
+
+.gallery-uploader-details {
+  display: grid;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.gallery-uploader-id {
+  color: var(--app-text-muted, #a1a1aa);
+  font-size: 10px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.gallery-uploader-name {
+  color: var(--app-text, #f4f4f5);
+  font-size: 11px;
+  font-weight: 700;
+  word-break: break-word;
 }
 
 .gallery-empty {
