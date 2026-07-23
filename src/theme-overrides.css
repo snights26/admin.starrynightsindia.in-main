@@ -1318,6 +1318,28 @@ html[data-theme] :where(.target-badge, .fr-badge) {
   color: var(--app-text) !important;
 }
 
+/* Quotation media editor */
+html[data-theme] :where(.quote-image-picker, .quotation-itinerary-media-day, .quotation-hotel-media-card) {
+  background: var(--app-card-soft) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+
+html[data-theme] :where(.quote-hotel-image-editor strong, .quotation-media-help) {
+  color: var(--app-text-muted) !important;
+}
+
+html[data-theme] .quote-image-picker button {
+  min-width: 20px !important;
+  min-height: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  background: var(--app-card) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+
 /* Global chrome guard: admin footer must stay full-width with sharp edges. */
 html[data-theme] .footer {
   width: 100% !important;

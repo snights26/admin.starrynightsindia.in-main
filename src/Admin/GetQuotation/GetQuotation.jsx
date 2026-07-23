@@ -3,6 +3,7 @@ import "./GetQuotation.css";
 import html2pdf from "html2pdf.js";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import { IMAGE_FILE_ACCEPT, optimizeImageFile, resolveAssetUrl, validateImageFile } from "../../Utils/fileUpload";
 
 const COMPANY = {
   name: "Starry Nights Holidays",
@@ -36,6 +37,8 @@ const DEFAULT_FORM = {
   itineraryDays: "",
   employeeName: ""
 };
+
+const HOTEL_TIERS = ["classic", "signature", "elite"];
 
 const today = new Date().toLocaleDateString("en-GB", {
   weekday: "long",
@@ -106,10 +109,79 @@ const normalizeItinerary = (items = [], count = 0) => {
       dayNumber: day,
       title: existing.title || `Day ${day}`,
       desc: existing.desc || existing.description || "",
-      description: existing.description || existing.desc || ""
+      description: existing.description || existing.desc || "",
+      imageUrls: Array.isArray(existing.imageUrls)
+        ? existing.imageUrls
+        : Array.isArray(existing.images)
+        ? existing.images
+        : []
     };
   });
 };
+
+const normalizeHotelImages = (images = {}) => Object.fromEntries(
+  HOTEL_TIERS.map((tier) => [tier, images?.[tier] || null])
+);
+
+function QuoteImagePicker({ image, label, onSelect, onRemove }) {
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  useEffect(() => {
+    if (!image) {
+      setPreviewUrl("");
+      return undefined;
+    }
+    if (typeof image === "string") {
+      setPreviewUrl(resolveAssetUrl(image));
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(image);
+    setPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
+  const handleSelection = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      validateImageFile(file);
+      onSelect(await optimizeImageFile(file));
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  return (
+    <div className="quote-image-picker">
+      {previewUrl ? <img src={previewUrl} alt={label} /> : <span>{label}</span>}
+      <input type="file" accept={IMAGE_FILE_ACCEPT} aria-label={`Upload ${label}`} onChange={handleSelection} />
+      {previewUrl && <button type="button" onClick={onRemove} aria-label={`Remove ${label}`}>x</button>}
+    </div>
+  );
+}
+
+function QuotePdfImage({ image, alt }) {
+  const [source, setSource] = useState("");
+
+  useEffect(() => {
+    if (!image) {
+      setSource("");
+      return undefined;
+    }
+    if (typeof image === "string") {
+      setSource(resolveAssetUrl(image));
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(image);
+    setSource(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
+  return source ? <img src={source} alt={alt} crossOrigin="anonymous" /> : null;
+}
 
 function QuoteFooter({ page, total }) {
   return (
@@ -188,6 +260,7 @@ export default function GetQuotation() {
   const [categoryTree, setCategoryTree] = useState([]);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [quoteItinerary, setQuoteItinerary] = useState([]);
+  const [hotelImages, setHotelImages] = useState(() => normalizeHotelImages());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -221,6 +294,7 @@ export default function GetQuotation() {
         info: json.info || {}
       });
       setQuoteItinerary(editableItinerary);
+      setHotelImages(normalizeHotelImages(json.quotationHotelImages));
 
       setForm((prev) => ({
         ...prev,
@@ -260,6 +334,24 @@ export default function GetQuotation() {
     }));
   };
 
+  const updateItineraryImage = (dayIndex, imageIndex, image) => {
+    setQuoteItinerary((prev) => prev.map((day, index) => {
+      if (index !== dayIndex) return day;
+      const imageUrls = [...(day.imageUrls || [])];
+      imageUrls[imageIndex] = image;
+      return { ...day, imageUrls };
+    }));
+  };
+
+  const removeItineraryImage = (dayIndex, imageIndex) => {
+    setQuoteItinerary((prev) => prev.map((day, index) => {
+      if (index !== dayIndex) return day;
+      const imageUrls = [...(day.imageUrls || [])];
+      imageUrls.splice(imageIndex, 1);
+      return { ...day, imageUrls };
+    }));
+  };
+
   const itineraryPages = data
     ? splitItinerary(
         quoteItinerary,
@@ -271,9 +363,19 @@ export default function GetQuotation() {
   const isInternational = data?.template === "international";
   const totalPages = data ? itineraryPages.length + (isInternational ? 5 : 4) : 0;
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     const element = document.getElementById("pdf-content");
     if (!element) return;
+
+    // Allow file-preview effects to mount their object URLs before collecting PDF images.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await Promise.all([...element.querySelectorAll("img")].map((image) => {
+      if (image.complete) return Promise.resolve();
+      return new Promise((resolve) => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      });
+    }));
 
     html2pdf().set({
       margin: 0,
@@ -362,6 +464,9 @@ export default function GetQuotation() {
                 onChange={(event) => updateItineraryCount(event.target.value)}
               />
             </div>
+            <p className="quotation-media-help">
+              Images are included in this quotation preview and downloaded PDF only; they do not change the package.
+            </p>
 
             <div className="itinerary-editor-list">
               {quoteItinerary.map((day, index) => (
@@ -377,6 +482,17 @@ export default function GetQuotation() {
                     onChange={(event) => updateItineraryDay(index, "desc", event.target.value)}
                     placeholder="Day description"
                   />
+                  <div className="quote-editor-image-grid">
+                    {[0, 1, 2].map((imageIndex) => (
+                      <QuoteImagePicker
+                        key={imageIndex}
+                        image={day.imageUrls?.[imageIndex]}
+                        label={`Day ${index + 1} image ${imageIndex + 1}`}
+                        onSelect={(image) => updateItineraryImage(index, imageIndex, image)}
+                        onRemove={() => removeItineraryImage(index, imageIndex)}
+                      />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -398,6 +514,21 @@ export default function GetQuotation() {
         <textarea placeholder="Classic Hotel Details" value={form.classicHotel} onChange={(event) => setForm({ ...form, classicHotel: event.target.value })} />
         <textarea placeholder="Signature Hotel Details" value={form.signatureHotel} onChange={(event) => setForm({ ...form, signatureHotel: event.target.value })} />
         <textarea placeholder="Elite Hotel Details" value={form.eliteHotel} onChange={(event) => setForm({ ...form, eliteHotel: event.target.value })} />
+        {data && (
+          <div className="quote-hotel-image-editor">
+            {HOTEL_TIERS.map((tier) => (
+              <div key={tier}>
+                <strong>{tier} hotel image</strong>
+                <QuoteImagePicker
+                  image={hotelImages[tier]}
+                  label={`${tier} hotel image`}
+                  onSelect={(image) => setHotelImages((prev) => ({ ...prev, [tier]: image }))}
+                  onRemove={() => setHotelImages((prev) => ({ ...prev, [tier]: null }))}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <h4>Pricing</h4>
         <div className="form-row">
@@ -445,6 +576,17 @@ export default function GetQuotation() {
                 <div key={`${day.day || index}-${day.title}`} className="day-box">
                   <h4>Day {day.day || day.dayNumber || index + 1} - {day.title || "Planned Experience"}</h4>
                   <p>{day.desc || day.description || "Details will be shared by the operations team."}</p>
+                  {(day.imageUrls || []).filter(Boolean).length > 0 && (
+                    <div className="quote-day-image-grid">
+                      {(day.imageUrls || []).filter(Boolean).slice(0, 3).map((image, imageIndex) => (
+                        <QuotePdfImage
+                          key={`${day.day || index}-image-${imageIndex}`}
+                          alt={`Day ${day.day || index + 1}`}
+                          image={image}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )) : (
                 <div className="day-box">
@@ -462,9 +604,13 @@ export default function GetQuotation() {
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Hotels, Transfers and Costing</h3>
             <div className="hotel-grid">
-              <div><strong>Classic</strong><p>{form.classicHotel || "Hotel details to be confirmed."}</p></div>
-              <div><strong>Signature</strong><p>{form.signatureHotel || "Hotel details to be confirmed."}</p></div>
-              <div><strong>Elite</strong><p>{form.eliteHotel || "Hotel details to be confirmed."}</p></div>
+              {HOTEL_TIERS.map((tier) => (
+                <div key={tier}>
+                  <strong>{tier}</strong>
+                  {hotelImages[tier] && <QuotePdfImage image={hotelImages[tier]} alt={`${tier} hotel`} />}
+                  <p>{form[`${tier}Hotel`] || "Hotel details to be confirmed."}</p>
+                </div>
+              ))}
             </div>
             <PricingBlock form={form} isInternational={isInternational} />
             <div className="quote-note">
