@@ -98,6 +98,9 @@ function FirstRowToursList() {
           options={availableOptions}
           value={selectedPackage ? availableOptions.find((opt) => opt.value === selectedPackage) : null}
           onChange={(selected) => setSelectedPackage(selected?.value || "")}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         />
 
         <button className="fr-add-btn" onClick={handleAdd}>+ Add Package</button>
