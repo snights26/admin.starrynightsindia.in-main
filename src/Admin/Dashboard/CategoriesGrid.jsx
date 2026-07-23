@@ -94,39 +94,48 @@ export default function CategoriesGrid() {
             <tr>
               <th>Code</th>
               <th>{isSubcategoryView ? "Subcategory" : "Parent Category"}</th>
-              <th>{isSubcategoryView ? "Packages" : "Subcategories"}</th>
-              <th>Action</th>
+              <th>{isSubcategoryView ? "Package Management" : "Subcategories"}</th>
             </tr>
           </thead>
           <tbody>
             {visibleCategories.length === 0 ? (
               <tr>
-                <td colSpan="4" className="category-table-empty">
+                <td colSpan="3" className="category-table-empty">
                   {isSubcategoryView ? "No subcategories found" : "No parent categories found"}
                 </td>
               </tr>
             ) : visibleCategories.map((category) => {
               const children = Array.isArray(category.children) ? category.children : [];
               return (
-                <tr
-                  key={category.code}
-                  className="category-dashboard-row"
-                  onClick={() => isSubcategoryView ? openSubcategory(category) : selectParent(category)}
-                >
+                <tr key={category.code} className={isSubcategoryView ? "category-dashboard-row" : ""}>
                   <td className="category-table-code">{category.code}</td>
-                  <td className="category-table-name">{categoryName(category)}</td>
-                  <td>{isSubcategoryView ? "Manage packages" : children.length}</td>
                   <td>
-                    <button
-                      type="button"
-                      className="category-table-action"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        isSubcategoryView ? openSubcategory(category) : selectParent(category);
-                      }}
-                    >
-                      {isSubcategoryView ? "Manage Packages" : "View Subcategories"}
-                    </button>
+                    {isSubcategoryView ? (
+                      <button
+                        type="button"
+                        className="subcategory-name-link"
+                        onClick={() => openSubcategory(category)}
+                      >
+                        {categoryName(category)}
+                      </button>
+                    ) : (
+                      <span className="category-table-name">{categoryName(category)}</span>
+                    )}
+                  </td>
+                  <td>
+                    {isSubcategoryView ? (
+                      <span className="category-package-hint">Click subcategory name to manage packages</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="subcategory-count-button"
+                        onClick={() => selectParent(category)}
+                        disabled={children.length === 0}
+                        aria-label={`View ${children.length} subcategories for ${categoryName(category)}`}
+                      >
+                        {children.length}
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
