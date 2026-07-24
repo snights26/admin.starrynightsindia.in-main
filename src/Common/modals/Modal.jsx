@@ -1,10 +1,10 @@
 import "./modals.css";
 
-export default function Modal({ open, title, children, actions, onClose }) {
+export default function Modal({ open, title, children, actions, onClose, className = "" }) {
   if (!open) return null;
   return (
     <div className="app-modal__overlay" role="dialog" aria-modal="true">
-      <div className="app-modal">
+      <div className={`app-modal ${className}`.trim()}>
         <header className="app-modal__header">
           <h2>{title}</h2>
           {onClose && <button type="button" onClick={onClose}>x</button>}
