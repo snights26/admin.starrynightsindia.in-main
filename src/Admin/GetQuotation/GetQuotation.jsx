@@ -377,22 +377,62 @@ export default function GetQuotation() {
       });
     }));
 
-    html2pdf().set({
+    const quotePages = [...element.querySelectorAll(":scope > .page")];
+    if (!quotePages.length) return;
+
+    const pdfOptions = {
       margin: 0,
-      filename: `${data?.packageCode || "quotation"}-${data?.template || "tour"}-quotation.pdf`,
       image: { type: "jpeg", quality: 1 },
       html2canvas: {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        width: 794,
+        height: 1123,
+        windowWidth: 794,
+        windowHeight: 1123
       },
       jsPDF: {
         unit: "px",
         format: [794, 1123],
         orientation: "portrait"
-      },
-      pagebreak: { mode: ["css"] }
-    }).from(element).save();
+      }
+    };
+
+    // Each quotation section is already a complete A4 page. Rendering the pages separately
+    // avoids html2pdf combining CSS page breaks with its own canvas slicing, which caused
+    // an empty page between itinerary pages.
+    quotePages.forEach((quotePage) => quotePage.classList.add("is-exporting"));
+    try {
+      let pdf;
+
+      for (const [pageIndex, quotePage] of quotePages.entries()) {
+        const worker = html2pdf().set(pdfOptions).from(quotePage).toCanvas();
+        const canvas = await worker.get("canvas");
+
+        if (pageIndex === 0) {
+          await worker.toPdf();
+          pdf = await worker.get("pdf");
+          continue;
+        }
+
+        pdf.addPage([794, 1123], "portrait");
+        pdf.addImage(
+          canvas.toDataURL("image/jpeg", 1),
+          "JPEG",
+          0,
+          0,
+          794,
+          1123,
+          undefined,
+          "FAST"
+        );
+      }
+
+      pdf.save(`${data?.packageCode || "quotation"}-${data?.template || "tour"}-quotation.pdf`);
+    } finally {
+      quotePages.forEach((quotePage) => quotePage.classList.remove("is-exporting"));
+    }
   };
 
   return (
@@ -574,7 +614,10 @@ export default function GetQuotation() {
               <h3 className="section-title">Detailed Itinerary</h3>
               {pageDays.length ? pageDays.map((day, index) => (
                 <div key={`${day.day || index}-${day.title}`} className="day-box">
-                  <h4>Day {day.day || day.dayNumber || index + 1} - {day.title || "Planned Experience"}</h4>
+                  <div className="day-box-heading">
+                    <span className="day-box-label">Day {day.day || day.dayNumber || index + 1}</span>
+                    <h4>{day.title || "Planned Experience"}</h4>
+                  </div>
                   <p>{day.desc || day.description || "Details will be shared by the operations team."}</p>
                   {(day.imageUrls || []).filter(Boolean).length > 0 && (
                     <div className="quote-day-image-grid">
@@ -599,7 +642,7 @@ export default function GetQuotation() {
             </div>
           ))}
 
-          <div className="page page-break">
+          <div className="page">
             <img src="/Starry Nights Holidays.png" className="quote-watermark" alt="" />
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Hotels, Transfers and Costing</h3>
@@ -620,7 +663,7 @@ export default function GetQuotation() {
             <QuoteFooter page={itineraryPages.length + 1} total={totalPages} />
           </div>
 
-          <div className="page page-break">
+          <div className="page">
             <img src="/Starry Nights Holidays.png" className="quote-watermark" alt="" />
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Package Inclusions</h3>
@@ -635,7 +678,7 @@ export default function GetQuotation() {
           </div>
 
           {isInternational && (
-            <div className="page page-break">
+            <div className="page">
               <img src="/Starry Nights Holidays.png" className="quote-watermark" alt="" />
               <QuoteHeader template={data.template} title={data.heroTitle} />
               <h3 className="section-title">Visa and Travel Advisory</h3>
@@ -662,7 +705,7 @@ export default function GetQuotation() {
             </div>
           )}
 
-          <div className="page page-break">
+          <div className="page">
             <img src="/Starry Nights Holidays.png" className="quote-watermark" alt="" />
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Booking Terms</h3>
@@ -676,7 +719,7 @@ export default function GetQuotation() {
             <QuoteFooter page={itineraryPages.length + (isInternational ? 4 : 3)} total={totalPages} />
           </div>
 
-          <div className="page page-break">
+          <div className="page">
             <img src="/Starry Nights Holidays.png" className="quote-watermark" alt="" />
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Cancellation Policy and Account Details</h3>

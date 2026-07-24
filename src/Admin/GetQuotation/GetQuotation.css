@@ -479,10 +479,12 @@ html[data-theme="light"] .itinerary-editor-day strong {
   line-height: 1.35;
 }
 
-.section-title {
+.page .section-title {
   margin: 20px 0 12px;
-  color: #0b1f3a;
+  color: #0b1f3a !important;
   font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
   padding-bottom: 7px;
   border-bottom: 1px solid #d7dde8;
 }
@@ -491,8 +493,11 @@ html[data-theme="light"] .itinerary-editor-day strong {
   margin-top: 10px;
   border-left: 4px solid #d9101f;
   border-radius: 8px;
+  border-top: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
   background: #fbfcfe;
-  padding: 12px 14px;
+  padding: 13px 15px;
   page-break-inside: avoid;
 }
 
@@ -500,19 +505,48 @@ html[data-theme="light"] .itinerary-editor-day strong {
   border-left-color: #0b5d8f;
 }
 
-.day-box h4 {
-  margin: 0 0 6px;
-  color: #111827;
-  font-size: 14px;
+.day-box-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 7px;
 }
 
-.day-box p,
+.day-box-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #d9101f;
+  color: #ffffff !important;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.45px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.quote-international .day-box-label {
+  background: #0b5d8f;
+}
+
+.page .day-box h4 {
+  margin: 0;
+  color: #111827 !important;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.page .day-box p,
 .hotel-grid p,
 .terms-block p,
 .advisory-grid p,
 .quote-note {
   margin: 0;
-  color: #374151;
+  color: #374151 !important;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -688,10 +722,6 @@ html[data-theme="light"] .itinerary-editor-day strong {
   text-transform: uppercase;
 }
 
-.page-break {
-  page-break-before: always;
-}
-
 @media print {
   body,
   .quotation-container {
@@ -725,37 +755,37 @@ html[data-theme="light"] .itinerary-editor-day strong {
 }
 
 @media (max-width: 860px) {
-  .page {
+  .page:not(.is-exporting) {
     width: 100%;
     min-height: auto;
     padding: 24px 18px 34px;
   }
 
-  .quote-header,
-  .quote-info-grid,
-  .hotel-grid,
-  .quote-pricing-grid,
-  .advisory-grid,
+  .page:not(.is-exporting) .quote-header,
+  .page:not(.is-exporting) .quote-info-grid,
+  .page:not(.is-exporting) .hotel-grid,
+  .page:not(.is-exporting) .quote-pricing-grid,
+  .page:not(.is-exporting) .advisory-grid,
   .form-row,
   .form-row.two {
     grid-template-columns: 1fr;
   }
 
-  .quote-doc-card {
+  .page:not(.is-exporting) .quote-doc-card {
     text-align: left;
   }
 
-  .quote-footer {
+  .page:not(.is-exporting) .quote-footer {
     flex-direction: column;
   }
 
-  .quote-footer div:last-child {
+  .page:not(.is-exporting) .quote-footer div:last-child {
     align-items: flex-start;
   }
 
   .quote-editor-image-grid,
   .quote-hotel-image-editor,
-  .quote-day-image-grid {
+  .page:not(.is-exporting) .quote-day-image-grid {
     grid-template-columns: 1fr;
   }
 }
