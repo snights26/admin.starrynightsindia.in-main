@@ -40,7 +40,8 @@
   align-items: center;
 }
 
-.ulp-actions input {
+.ulp-actions input,
+.ulp-actions select {
   min-width: 280px;
   padding: 12px 14px;
   border-radius: 12px;
@@ -48,6 +49,10 @@
   background: var(--app-input, #ffffff);
   color: var(--app-text, #111827);
   font-size: 14px;
+}
+
+.ulp-actions select {
+  min-width: 170px;
 }
 
 .ulp-actions button {

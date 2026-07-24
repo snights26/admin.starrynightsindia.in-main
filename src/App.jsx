@@ -12,6 +12,7 @@ import TransportSlip from "./Common/TransportSlip";
 import UsersList from "./Admin/Users/UsersList";
 import EditUser from "./Admin/Users/EditUser";
 import UserLikedPackages from "./Admin/UserLikedPackages/UserLikedPackages";
+import PackageViewAnalytics from "./Admin/PackageViews/PackageViewAnalytics";
 
 import EnquiryList from "./Admin/Enquiry/EnquiryList";
 
@@ -168,6 +169,10 @@ function AppWrapper() {
         <Route
           path="/admin/user-liked-packages"
           element={<ProtectedRoute><UserLikedPackages /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/package-views"
+          element={<ProtectedRoute><PackageViewAnalytics /></ProtectedRoute>}
         />
 
         {/* ENQUIRY */}

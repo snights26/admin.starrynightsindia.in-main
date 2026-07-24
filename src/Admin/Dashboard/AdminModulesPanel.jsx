@@ -7,6 +7,7 @@ const moduleSections = [
     items: [
       "Users",
       "User Package Likes",
+      "Package View Analytics",
       "Active Enquiry",
       "Payments",
       
@@ -45,6 +46,7 @@ function AdminModulesPanel() {
   const routes = {
     "Users": "/admin/users",
     "User Package Likes": "/admin/user-liked-packages",
+    "Package View Analytics": "/admin/package-views",
     "Active Enquiry": "/admin/enquiry",
     "Payments": "/admin/payments",
     "Package": "/admin/packages",

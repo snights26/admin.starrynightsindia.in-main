@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import { resolveAssetUrl } from "../../Utils/fileUpload";
+import { categoryCode, packageMatchesCategoryFilters, parentCategoriesFromTree, subcategoriesForParent } from "../../Utils/categoryFilters";
 import "./UserLikedPackages.css";
 
 function packageImage(pkg = {}) {
@@ -45,14 +46,18 @@ export default function UserLikedPackages() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [search, setSearch] = useState("");
+  const [categoryTree, setCategoryTree] = useState([]);
+  const [parentCode, setParentCode] = useState("");
+  const [subcategoryCode, setSubcategoryCode] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    loadLikedPackageReport()
-      .then((data) => {
+    Promise.all([loadLikedPackageReport(), api.get("/categories/tree").catch(() => [])])
+      .then(([data, tree]) => {
         if (active) {
           setRows(Array.isArray(data) ? data : []);
+          setCategoryTree(Array.isArray(tree) ? tree : []);
         }
       })
       .catch((error) => {
@@ -72,21 +77,22 @@ export default function UserLikedPackages() {
     };
   }, []);
 
+  const parentCategories = useMemo(() => parentCategoriesFromTree(categoryTree), [categoryTree]);
+  const subcategories = useMemo(() => subcategoriesForParent(parentCategories, parentCode), [parentCategories, parentCode]);
+
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) {
-      return rows;
-    }
-    return rows.filter((user) => {
+    return rows.map((user) => {
+      const likedPackages = (user.likedPackages || []).filter((pkg) => packageMatchesCategoryFilters(pkg, parentCode, subcategoryCode));
       const haystack = [
         user.userId,
         user.name,
         user.email,
-        ...(user.likedPackages || []).flatMap((pkg) => [pkg.packageCode, pkg.title, pkg.name])
+        ...likedPackages.flatMap((pkg) => [pkg.packageCode, pkg.title, pkg.name])
       ].filter(Boolean).join(" ").toLowerCase();
-      return haystack.includes(query);
-    });
-  }, [rows, search]);
+      return { ...user, likedPackages, matchesSearch: !query || haystack.includes(query) };
+    }).filter((user) => user.matchesSearch && user.likedPackages.length > 0);
+  }, [parentCode, rows, search, subcategoryCode]);
 
   return (
     <main className="ulp-page">
@@ -102,6 +108,20 @@ export default function UserLikedPackages() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search user or package..."
           />
+          <select value={parentCode} onChange={(event) => {
+            setParentCode(event.target.value);
+            setSubcategoryCode("");
+          }}>
+            <option value="">All parent categories</option>
+            {parentCategories.map((category) => <option key={category.code} value={category.code}>{category.name}</option>)}
+          </select>
+          <select value={subcategoryCode} onChange={(event) => setSubcategoryCode(event.target.value)}>
+            <option value="">All subcategories</option>
+            {subcategories.map((category) => {
+              const code = categoryCode(category);
+              return <option key={code} value={code}>{category.name || category.categoryName || code}</option>;
+            })}
+          </select>
           <button type="button" onClick={() => navigate("/dashboard")}>Back</button>
         </div>
       </header>
