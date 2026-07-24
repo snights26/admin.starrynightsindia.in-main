@@ -41,6 +41,8 @@ import AddGallery from "./Admin/Gallery/AddGallery";
 import EditGallery from "./Admin/Gallery/EditGallery";
 import HeroSlidersList from "./Admin/HeroSliders/HeroSlidersList";
 import HeroSliderForm from "./Admin/HeroSliders/HeroSliderForm";
+import HomepageStatisticsList from "./Admin/HomepageStatistics/HomepageStatisticsList";
+import HomepageStatisticForm from "./Admin/HomepageStatistics/HomepageStatisticForm";
 
 import NotificationsList from "./Admin/Notifications/NotificationsList";
 import AddNotification from "./Admin/Notifications/AddNotification";
@@ -270,6 +272,20 @@ function AppWrapper() {
         <Route
           path="/admin/hero-sliders/edit/:id"
           element={<ProtectedRoute><HeroSliderForm mode="edit" /></ProtectedRoute>}
+        />
+
+        {/* HOMEPAGE STATISTICS */}
+        <Route
+          path="/admin/homepage-statistics"
+          element={<ProtectedRoute><HomepageStatisticsList /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/homepage-statistics/add"
+          element={<ProtectedRoute><HomepageStatisticForm mode="add" /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/homepage-statistics/edit/:id"
+          element={<ProtectedRoute><HomepageStatisticForm mode="edit" /></ProtectedRoute>}
         />
 
         {/* NOTIFICATIONS */}

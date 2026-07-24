@@ -21,6 +21,7 @@ const moduleSections = [
       "Package",
       "Gallery",
       "Hero Sliders",
+      "Homepage Statistics",
       "Featured Rows",
       "FirstRow Tours",
       "Top10"
@@ -52,6 +53,7 @@ function AdminModulesPanel() {
     "FirstRow Tours": "/admin/first-row-tours",
     "Gallery": "/admin/gallery",
     "Hero Sliders": "/admin/hero-sliders",
+    "Homepage Statistics": "/admin/homepage-statistics",
     "Notification": "/admin/notifications",
     "Keywords": "/admin/keywords",
     "Unanswered Questions": "/admin/unanswered",
