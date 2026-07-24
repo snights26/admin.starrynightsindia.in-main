@@ -35,10 +35,12 @@ const DEFAULT_FORM = {
   firstPageCount: "3",
   otherPageCount: "5",
   itineraryDays: "",
-  employeeName: ""
+  employeeName: "",
+  customerEmail: ""
 };
 
 const HOTEL_TIERS = ["classic", "signature", "elite"];
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const today = new Date().toLocaleDateString("en-GB", {
   weekday: "long",
@@ -261,6 +263,8 @@ export default function GetQuotation() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [quoteItinerary, setQuoteItinerary] = useState([]);
   const [hotelImages, setHotelImages] = useState(() => normalizeHotelImages());
+  const [emailStatus, setEmailStatus] = useState(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -295,6 +299,7 @@ export default function GetQuotation() {
       });
       setQuoteItinerary(editableItinerary);
       setHotelImages(normalizeHotelImages(json.quotationHotelImages));
+      setEmailStatus(null);
 
       setForm((prev) => ({
         ...prev,
@@ -363,9 +368,11 @@ export default function GetQuotation() {
   const isInternational = data?.template === "international";
   const totalPages = data ? itineraryPages.length + (isInternational ? 5 : 4) : 0;
 
-  const downloadPDF = async () => {
+  const buildQuotationPdf = async () => {
     const element = document.getElementById("pdf-content");
-    if (!element) return;
+    if (!element) {
+      throw new Error("Generate a quotation before creating the PDF.");
+    }
 
     // Allow file-preview effects to mount their object URLs before collecting PDF images.
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -378,7 +385,9 @@ export default function GetQuotation() {
     }));
 
     const quotePages = [...element.querySelectorAll(":scope > .page")];
-    if (!quotePages.length) return;
+    if (!quotePages.length) {
+      throw new Error("Quotation pages are unavailable.");
+    }
 
     const pdfOptions = {
       margin: 0,
@@ -429,9 +438,49 @@ export default function GetQuotation() {
         );
       }
 
-      pdf.save(`${data?.packageCode || "quotation"}-${data?.template || "tour"}-quotation.pdf`);
+      return {
+        pdf,
+        filename: `${data?.packageCode || "quotation"}-${data?.template || "tour"}-quotation.pdf`
+      };
     } finally {
       quotePages.forEach((quotePage) => quotePage.classList.remove("is-exporting"));
+    }
+  };
+
+  const downloadPDF = async () => {
+    try {
+      const { pdf, filename } = await buildQuotationPdf();
+      pdf.save(filename);
+    } catch (error) {
+      setEmailStatus({ type: "error", message: error.message || "Unable to generate the quotation PDF." });
+    }
+  };
+
+  const sendQuotationEmail = async () => {
+    const customerEmail = String(form.customerEmail || "").trim();
+    if (!EMAIL_PATTERN.test(customerEmail)) {
+      setEmailStatus({ type: "error", message: "Enter a valid customer email address before sending the quotation." });
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailStatus(null);
+    try {
+      const { pdf, filename } = await buildQuotationPdf();
+      const formData = new FormData();
+      formData.append("customerEmail", customerEmail);
+      formData.append("packageName", data?.heroTitle || data?.packageCode || "Travel Package");
+      formData.append("packageCode", data?.packageCode || pkgId || "quotation");
+      formData.append("quotation", pdf.output("blob"), filename);
+      await api.post("/quotations/email", formData);
+      setEmailStatus({ type: "success", message: `Quotation sent to ${customerEmail}.` });
+    } catch (error) {
+      setEmailStatus({
+        type: "error",
+        message: error.response?.data?.message || "Unable to send the quotation email. You can still download the PDF."
+      });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -457,6 +506,14 @@ export default function GetQuotation() {
           onChange={(event) => setForm({ ...form, employeeName: event.target.value })}
         />
 
+        <h4>Customer Details</h4>
+        <input
+          type="email"
+          placeholder="Customer Email"
+          value={form.customerEmail}
+          onChange={(event) => setForm({ ...form, customerEmail: event.target.value })}
+        />
+
         <h4>Package</h4>
         <div className="form-row two">
           <input
@@ -474,8 +531,16 @@ export default function GetQuotation() {
         <div className="btn-row">
           <button className="fetch-btn" onClick={fetchPackage}>Fetch Package</button>
           <button className="print-btn" onClick={downloadPDF} disabled={!data}>Download PDF</button>
+          <button className="quote-email-btn" onClick={sendQuotationEmail} disabled={!data || sendingEmail}>
+            {sendingEmail ? "Sending Email..." : "Send by Email"}
+          </button>
           <button className="quote-back-btn" onClick={() => navigate("/dashboard")}>Back to Dashboard</button>
         </div>
+        {emailStatus && (
+          <p className={`quote-email-status ${emailStatus.type}`} role={emailStatus.type === "error" ? "alert" : "status"}>
+            {emailStatus.message}
+          </p>
+        )}
 
         <h4>Itinerary Settings</h4>
         <div className="form-row two">

@@ -137,8 +137,41 @@
   background: #138a36;
 }
 
+.quote-email-btn {
+  background: #0b5d8f;
+}
+
 .quote-back-btn {
   background: #273142;
+}
+
+.quote-email-status {
+  margin: -2px 0 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.quote-email-status.success {
+  border-color: rgba(34, 197, 94, 0.42);
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.quote-email-status.error {
+  border-color: rgba(248, 113, 113, 0.48);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+html[data-theme="light"] .quote-email-status.success {
+  color: #166534;
+}
+
+html[data-theme="light"] .quote-email-status.error {
+  color: #b91c1c;
 }
 
 .itinerary-editor {
