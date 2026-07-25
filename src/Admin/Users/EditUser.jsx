@@ -13,6 +13,8 @@ function ViewUser() {
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
 
@@ -22,7 +24,6 @@ function ViewUser() {
         setUser(data);
         setPreview(resolveAssetUrl(data.profileImage || data.photo || ""));
       } catch (error) {
-        console.error("Failed to load user", error);
         setUser({});
       }
 
@@ -34,11 +35,15 @@ function ViewUser() {
   }, [id]);
 
   const confirmDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError("");
     try {
       await api.delete(`/users/${id}`);
-      navigate("/admin/users");
-    } catch (err) {
-      console.error(err);
+      navigate("/admin/users", { state: { deletionNotice: "User permanently deleted." } });
+    } catch (error) {
+      setDeleteError(error.response?.data?.message || "Unable to delete this user. Please try again.");
+      setDeleting(false);
     }
   };
 
@@ -54,14 +59,16 @@ function ViewUser() {
 
             <h3>⚠ Confirm Delete</h3>
             <p>Are you sure you want to delete <b>{user.name}</b>?</p>
+            <p>This permanently removes the user account and related personal records. Users with booking records are protected.</p>
+            {deleteError && <p className="eu-delete-error" role="alert">{deleteError}</p>}
 
             <div className="eu-popup-actions">
-              <button onClick={() => setShowDeleteConfirm(false)}>
+              <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
                 Cancel
               </button>
 
-              <button className="danger" onClick={confirmDelete}>
-                Delete
+              <button className="danger" onClick={confirmDelete} disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete permanently"}
               </button>
             </div>
 

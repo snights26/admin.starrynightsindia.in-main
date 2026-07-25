@@ -17,6 +17,32 @@
   font-size: 20px; /* add control */
 }
 
+.ul-header p {
+  margin: 4px 0 0;
+  color: #a9a9a9;
+  font-size: 12px;
+}
+
+.ul-feedback {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.ul-feedback.success {
+  background: rgba(19, 105, 57, 0.25);
+  border-color: #208f53;
+  color: #ceffe1;
+}
+
+.ul-feedback.error {
+  background: rgba(167, 24, 24, 0.22);
+  border-color: #d73333;
+  color: #ffd0d0;
+}
+
 .ul-header button {
   margin-left: 6px; /* 10 → 6 */
   background: #1c1c1c;
@@ -116,6 +142,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .ul-popup-box {
@@ -123,7 +150,25 @@
   padding: 20px; /* 30 → 20 */
   border-radius: 8px;
   text-align: center;
-  width: 260px; /* control size */
+  width: min(92vw, 390px);
+}
+
+.ul-popup-box h3 {
+  color: #fff;
+}
+
+.ul-popup-box p {
+  line-height: 1.45;
+}
+
+.ul-delete-warning {
+  color: #e4b3b3;
+  font-size: 12px;
+}
+
+.ul-modal-error {
+  color: #ffb4b4;
+  font-size: 12px;
 }
 
 .ul-popup-actions {
@@ -142,6 +187,17 @@
 .ul-popup-actions .danger {
   background: #e50914;
   color: white;
+}
+
+.ul-popup-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.ul-empty {
+  color: #aaa;
+  padding: 24px !important;
+  text-align: center;
 }
 
 /* SEARCH */

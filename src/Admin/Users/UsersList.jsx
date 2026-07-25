@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import "./UsersList.css";
 
 function UsersList() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [users, setUsers] = useState([]);
   const [searchId, setSearchId] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadUsers = async () => {
     try {
       const data = await api.get("/users");
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Failed to load users", error);
       setUsers([]);
+      setFeedback({ type: "error", message: "Unable to load unauthorized users." });
     }
   };
 
@@ -25,51 +28,82 @@ function UsersList() {
     loadUsers();
   }, []);
 
+  useEffect(() => {
+    if (!location.state?.deletionNotice) return;
+    setFeedback({ type: "success", message: location.state.deletionNotice });
+    navigate(location.pathname, { replace: true });
+  }, [location.pathname, location.state, navigate]);
+
   const filteredUsers = users.filter((u) =>
-    (u.userId || u.email || "").toLowerCase().includes(searchId.toLowerCase())
+    [u.userId, u.name, u.email].some((value) =>
+      (value || "").toLowerCase().includes(searchId.toLowerCase())
+    )
   );
 
   const confirmDelete = (user) => {
+    setFeedback(null);
     setSelectedUser(user);
     setShowConfirm(true);
   };
 
+  const closeConfirm = () => {
+    if (deleting) return;
+    setShowConfirm(false);
+    setSelectedUser(null);
+  };
+
   const deleteUser = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || deleting) return;
+    setDeleting(true);
     try {
       await api.delete(`/users/${selectedUser.userId || selectedUser.id}`);
       setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
-    } catch (error) {
-      console.error("Failed to delete user", error);
-    } finally {
+      setFeedback({ type: "success", message: "User permanently deleted." });
       setShowConfirm(false);
       setSelectedUser(null);
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        message: error.response?.data?.message || "Unable to delete this user. Please try again.",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
     <div className="ul-page">
       {showConfirm && (
-        <div className="ul-popup">
-          <div className="ul-popup-box">
-            <h3>Confirm Delete</h3>
-            <p>{selectedUser?.name}</p>
+        <div className="ul-popup" role="presentation">
+          <div className="ul-popup-box" role="alertdialog" aria-modal="true" aria-labelledby="delete-user-title">
+            <h3 id="delete-user-title">Permanently delete user?</h3>
+            <p>Delete <strong>{selectedUser?.name}</strong> ({selectedUser?.userId})?</p>
+            <p className="ul-delete-warning">
+              This removes the account, active sessions, saved packages, personal notifications, and view history.
+              Users with booking records cannot be deleted.
+            </p>
+            {feedback?.type === "error" && <p className="ul-modal-error" role="alert">{feedback.message}</p>}
 
             <div className="ul-popup-actions">
-              <button onClick={() => setShowConfirm(false)}>Cancel</button>
-              <button onClick={deleteUser} className="danger">Delete</button>
+              <button onClick={closeConfirm} disabled={deleting}>Cancel</button>
+              <button onClick={deleteUser} className="danger" disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete permanently"}
+              </button>
             </div>
           </div>
         </div>
       )}
 
       <div className="ul-header">
-        <h2>Users</h2>
+        <div>
+          <h2>Unauthorized Users</h2>
+          <p>Regular customer accounts only. Administrator accounts are protected.</p>
+        </div>
 
         <div>
           <input
             type="text"
-            placeholder="Search by User ID..."
+            placeholder="Search by ID, name, or email..."
             value={searchId}
             onChange={(e) => setSearchId(e.target.value)}
             className="ul-search"
@@ -78,6 +112,12 @@ function UsersList() {
           <button onClick={() => navigate("/dashboard")}>Back</button>
         </div>
       </div>
+
+      {feedback && (
+        <div className={`ul-feedback ${feedback.type}`} role={feedback.type === "error" ? "alert" : "status"}>
+          {feedback.message}
+        </div>
+      )}
 
       <div className="ul-table-box">
         <table>
@@ -95,6 +135,11 @@ function UsersList() {
           </thead>
 
           <tbody>
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td className="ul-empty" colSpan="8">No unauthorized users found.</td>
+              </tr>
+            )}
             {filteredUsers.map((u) => (
               <tr key={u.id || u.userId}>
                 <td>{u.userId}</td>
