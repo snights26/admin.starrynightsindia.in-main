@@ -401,3 +401,56 @@
     align-items: flex-start;
   }
 }
+
+/* Export mode is deliberately fixed at the CSS-pixel A4 size (210 x 297 mm at 96 DPI).
+   It overrides the responsive preview rules before html2canvas captures each individual page. */
+.ts-a4.ts-pdf-export {
+  width: 794px;
+  min-width: 794px;
+  height: 1123px;
+  min-height: 1123px;
+  max-height: 1123px;
+  padding: 42px 48px 46px;
+  flex: 0 0 auto;
+}
+
+.ts-a4.ts-pdf-export .ts-page-header {
+  grid-template-columns: 92px minmax(0, 1fr) 170px;
+  text-align: left;
+}
+
+.ts-a4.ts-pdf-export .ts-document-meta {
+  text-align: right;
+}
+
+.ts-a4.ts-pdf-export .ts-hero {
+  flex-direction: row;
+}
+
+.ts-a4.ts-pdf-export .ts-summary-grid,
+.ts-a4.ts-pdf-export .ts-summary-grid-compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ts-a4.ts-pdf-export .ts-two-column {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.ts-a4.ts-pdf-export .ts-table {
+  display: table;
+  overflow: visible;
+  table-layout: fixed;
+}
+
+.ts-a4.ts-pdf-export .ts-table th,
+.ts-a4.ts-pdf-export .ts-table td {
+  min-width: 0;
+}
+
+.ts-a4.ts-pdf-export .ts-page-footer {
+  flex-direction: row;
+}
+
+.ts-a4.ts-pdf-export .ts-page-footer div:last-child {
+  align-items: flex-end;
+}

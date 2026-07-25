@@ -14,6 +14,12 @@ const COMPANY = {
   website: "www.starrynightsindia.in"
 };
 
+const PDF_PAGE = {
+  width: 794,
+  height: 1123
+};
+const ACCOMMODATION_PER_PAGE = 3;
+
 const display = (value, fallback = "-") => {
   if (value === null || value === undefined || value === "") return fallback;
   return value;
@@ -43,6 +49,15 @@ const normalizeAccommodation = (items = []) =>
       }))
     : [];
 
+const chunkAccommodation = (items, size = ACCOMMODATION_PER_PAGE) => {
+  if (!items.length) return [[]];
+
+  return Array.from(
+    { length: Math.ceil(items.length / size) },
+    (_, index) => items.slice(index * size, (index + 1) * size)
+  );
+};
+
 function PdfFooter({ page, total }) {
   return (
     <footer className="ts-page-footer">
@@ -70,9 +85,11 @@ function InfoItem({ label, value }) {
 function TransportSlip() {
   const { tourId } = useParams();
   const navigate = useNavigate();
-  const page1Ref = useRef();
-  const page2Ref = useRef();
+  const page1Ref = useRef(null);
+  const accommodationPageRefs = useRef([]);
   const [data, setData] = useState(null);
+  const accommodation = normalizeAccommodation(data?.accommodation);
+  const accommodationPages = chunkAccommodation(accommodation);
 
   useEffect(() => {
     document.title = `Transport Slip - ${tourId}`;
@@ -90,21 +107,42 @@ function TransportSlip() {
   }, [tourId]);
 
   const downloadPDF = async () => {
+    const pages = [
+      page1Ref.current,
+      ...accommodationPages.map((_, index) => accommodationPageRefs.current[index])
+    ].filter(Boolean);
+
+    if (!pages.length) return;
+
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
-    for (const [index, page] of [page1Ref.current, page2Ref.current].entries()) {
-      if (index > 0) pdf.addPage();
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: page.scrollWidth
-      });
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageWidth, pageHeight);
+    pages.forEach((page) => page.classList.add("ts-pdf-export"));
+
+    try {
+      if (document.fonts?.ready) await document.fonts.ready;
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      for (const [index, page] of pages.entries()) {
+        if (index > 0) pdf.addPage();
+
+        const canvas = await html2canvas(page, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          scrollX: 0,
+          scrollY: 0,
+          width: PDF_PAGE.width,
+          height: PDF_PAGE.height,
+          windowWidth: PDF_PAGE.width,
+          windowHeight: PDF_PAGE.height
+        });
+
+        pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageWidth, pageHeight);
+      }
+    } finally {
+      pages.forEach((page) => page.classList.remove("ts-pdf-export"));
     }
 
     pdf.save(`TransportSlip-${tourId}.pdf`);
@@ -112,7 +150,7 @@ function TransportSlip() {
 
   if (!data) return <div className="ts-container">Loading transport slip...</div>;
 
-  const accommodation = normalizeAccommodation(data.accommodation);
+  const totalPages = accommodationPages.length + 1;
   const guestName = data.fullName || data.name;
   const mobile = data.mobile || data.contact;
   const driverName = data.driverName || data.driver;
@@ -195,89 +233,101 @@ function TransportSlip() {
           Timings may vary because of weather, traffic, local restrictions, or hotel check-in rules.
         </div>
 
-        <PdfFooter page={1} total={2} />
+        <PdfFooter page={1} total={totalPages} />
       </section>
 
-      <section className="ts-a4" ref={page2Ref}>
-        <img src="/Starry Nights Holidays.png" alt="" className="ts-watermark" />
+      {accommodationPages.map((accommodationPage, pageIndex) => {
+        const pageNumber = pageIndex + 2;
 
-        <header className="ts-page-header ts-page-header-compact">
-          <img src="/Starry Nights Holidays.png" alt="Starry Nights Holidays" className="ts-logo" />
-          <div className="ts-company">
-            <span className="ts-eyebrow">Accommodation and Support</span>
-            <h1>{COMPANY.name}</h1>
-            <p>{COMPANY.address}</p>
-          </div>
-          <div className="ts-document-meta">
-            <span>Reference</span>
-            <strong>{display(data.tourId || tourId)}</strong>
-          </div>
-        </header>
+        return (
+          <section
+            className="ts-a4"
+            key={`accommodation-page-${pageIndex}`}
+            ref={(node) => {
+              accommodationPageRefs.current[pageIndex] = node;
+            }}
+          >
+            <img src="/Starry Nights Holidays.png" alt="" className="ts-watermark" />
 
-        <div className="ts-section-title">
-          <span>Stay Plan</span>
-          <h2>Accommodation Details</h2>
-        </div>
-
-        <table className="ts-table">
-          <thead>
-            <tr>
-              <th>City</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Hotel and Room</th>
-              <th>Meal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accommodation.length ? accommodation.map((hotel, index) => (
-              <tr key={`${hotel.hotel}-${index}`}>
-                <td>{hotel.city}</td>
-                <td>{hotel.checkin}</td>
-                <td>{hotel.checkout}</td>
-                <td>
-                  <strong>{hotel.hotel}</strong>
-                  <span>{hotel.room}</span>
-                </td>
-                <td>{hotel.meal}</td>
-              </tr>
-            )) : (
-              <tr>
-                <td colSpan="5">Accommodation details will be shared once confirmed.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <div className="ts-two-column ts-support-grid">
-          <div className="ts-panel">
-            <h3>Hotel Contacts</h3>
-            {accommodation.length ? accommodation.map((hotel, index) => (
-              <div className="ts-contact-line" key={`${hotel.contact}-${index}`}>
-                <strong>{hotel.hotel}</strong>
-                <span>{hotel.contact}</span>
+            <header className="ts-page-header ts-page-header-compact">
+              <img src="/Starry Nights Holidays.png" alt="Starry Nights Holidays" className="ts-logo" />
+              <div className="ts-company">
+                <span className="ts-eyebrow">Accommodation and Support</span>
+                <h1>{COMPANY.name}</h1>
+                <p>{COMPANY.address}</p>
               </div>
-            )) : (
-              <p className="ts-muted">No hotel contact details available yet.</p>
-            )}
-          </div>
+              <div className="ts-document-meta">
+                <span>Reference</span>
+                <strong>{display(data.tourId || tourId)}</strong>
+              </div>
+            </header>
 
-          <div className="ts-panel ts-emergency-panel">
-            <h3>Emergency Support</h3>
-            <InfoItem label="Support Desk" value="Starry Nights Support" />
-            <InfoItem label="Mobile" value={data.emergencyContact || COMPANY.phone} />
-            <InfoItem label="Alternate" value={COMPANY.alternatePhone} />
-            <InfoItem label="Email" value={COMPANY.email} />
-          </div>
-        </div>
+            <div className="ts-section-title">
+              <span>Stay Plan</span>
+              <h2>Accommodation Details</h2>
+            </div>
 
-        <div className="ts-note ts-note-light">
-          This slip is issued for coordination only. Hotel availability, room allocation, and vehicle
-          assignment remain subject to operational confirmation and local travel conditions.
-        </div>
+            <table className="ts-table">
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th>Hotel and Room</th>
+                  <th>Meal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accommodationPage.length ? accommodationPage.map((hotel, index) => (
+                  <tr key={`${hotel.hotel}-${pageIndex}-${index}`}>
+                    <td>{hotel.city}</td>
+                    <td>{hotel.checkin}</td>
+                    <td>{hotel.checkout}</td>
+                    <td>
+                      <strong>{hotel.hotel}</strong>
+                      <span>{hotel.room}</span>
+                    </td>
+                    <td>{hotel.meal}</td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="5">Accommodation details will be shared once confirmed.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
-        <PdfFooter page={2} total={2} />
-      </section>
+            <div className="ts-two-column ts-support-grid">
+              <div className="ts-panel">
+                <h3>Hotel Contacts</h3>
+                {accommodationPage.length ? accommodationPage.map((hotel, index) => (
+                  <div className="ts-contact-line" key={`${hotel.contact}-${pageIndex}-${index}`}>
+                    <strong>{hotel.hotel}</strong>
+                    <span>{hotel.contact}</span>
+                  </div>
+                )) : (
+                  <p className="ts-muted">No hotel contact details available yet.</p>
+                )}
+              </div>
+
+              <div className="ts-panel ts-emergency-panel">
+                <h3>Emergency Support</h3>
+                <InfoItem label="Support Desk" value="Starry Nights Support" />
+                <InfoItem label="Mobile" value={data.emergencyContact || COMPANY.phone} />
+                <InfoItem label="Alternate" value={COMPANY.alternatePhone} />
+                <InfoItem label="Email" value={COMPANY.email} />
+              </div>
+            </div>
+
+            <div className="ts-note ts-note-light">
+              This slip is issued for coordination only. Hotel availability, room allocation, and vehicle
+              assignment remain subject to operational confirmation and local travel conditions.
+            </div>
+
+            <PdfFooter page={pageNumber} total={totalPages} />
+          </section>
+        );
+      })}
     </div>
   );
 }
