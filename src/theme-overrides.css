@@ -50,7 +50,6 @@ html[data-theme] :where(
   .unanswered-page,
   .fr-page,
   .frf-page,
-  .top10-wrapper,
   .quotation-container,
   .about-page,
   .career-page,
@@ -75,7 +74,6 @@ html[data-theme] :where(
   .payment-card,
   .payments-card,
   .popup-box,
-  .top10-card,
   .fr-table-wrapper,
   .fr-modal,
   .fr-empty,
@@ -147,7 +145,6 @@ html[data-theme] :where(
   .payment-card,
   .payments-card,
   .popup-box,
-  .top10-card,
   .fr-table-wrapper,
   .fr-modal,
   .fr-empty,
@@ -201,7 +198,6 @@ html[data-theme] :where(
   .sbf-header h2,
   .addpkg-header h2,
   .editpkg-header h2,
-  .top10-title,
   .fr-title,
   .unanswered-title,
   .grid-title,
@@ -307,7 +303,6 @@ html[data-theme] :where(
   .tour-search,
   .grid-search,
   .unanswered-input,
-  .top10-select,
   .react-datepicker-wrapper input
 ) {
   background: var(--app-input) !important;
@@ -320,7 +315,7 @@ html[data-theme] :where(input, select, textarea)::placeholder {
 }
 
 html[data-theme] :where(input, select, textarea):focus,
-html[data-theme] :where(.tour-search, .grid-search, .unanswered-input, .top10-select):focus {
+html[data-theme] :where(.tour-search, .grid-search, .unanswered-input):focus {
   border-color: var(--app-accent) !important;
   box-shadow: var(--app-focus) !important;
   outline: none !important;
@@ -358,7 +353,6 @@ html[data-theme] :where(
   .invoice-btn,
   .fr-confirm,
   .fr-edit,
-  .top10-submit,
   .unanswered-submit,
   .contact-form button,
   .category-form button,
@@ -385,7 +379,6 @@ html[data-theme] :where(
   .invoice-btn:hover,
   .fr-confirm:hover,
   .fr-edit:hover,
-  .top10-submit:hover,
   .unanswered-submit:hover,
   .contact-form button:hover,
   .pkg-form .submit-btn:hover
@@ -398,7 +391,6 @@ html[data-theme] :where(
   .back-btn,
   .addpkg-back-btn,
   .editpkg-back-btn,
-  .top10-back,
   .unanswered-back-btn,
   .fr-cancel,
   .app-button--secondary,
@@ -686,8 +678,7 @@ html[data-theme] :where(
   .notification-list-page,
   .keywords-page,
   .unanswered-page,
-  .fr-page,
-  .top10-wrapper
+  .fr-page
 ) {
   background: var(--app-page-gradient) !important;
   color: var(--app-text) !important;
