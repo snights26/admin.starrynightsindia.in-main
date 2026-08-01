@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 import "./EnquiryList.css";
 
 function EnquiryList() {
@@ -158,9 +159,7 @@ ${e.message}`;
       {/* HEADER */}
       <div className="enquiry-header">
         <div className="header-left">
-          <button className="back-btn" onClick={() => navigate("/dashboard")}>
-            ← Back
-          </button>
+          <BackButton />
           <h1>Enquiry List</h1>
         </div>
 

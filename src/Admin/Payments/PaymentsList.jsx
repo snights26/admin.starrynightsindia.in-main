@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 import "./PaymentsList.css";
 
 export default function PaymentsList() {
@@ -177,12 +178,7 @@ export default function PaymentsList() {
 
       <div className="payments-topbar">
 
-        <button
-          className="back-btn"
-          onClick={() => navigate("/dashboard")}
-        >
-          ← Back
-        </button>
+        <BackButton />
 
       </div>
 

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 
 function FirstRowToursList() {
   const navigate = useNavigate();
@@ -88,9 +89,7 @@ function FirstRowToursList() {
           <p>Curate the packages visitors see first on the homepage.</p>
         </div>
 
-        <button className="fr-back-btn" onClick={() => navigate("/dashboard")}>
-          Back
-        </button>
+        <BackButton className="fr-back-btn" />
       </div>
 
       <div className="fr-add-card">

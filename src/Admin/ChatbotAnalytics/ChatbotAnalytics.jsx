@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 import "./ChatbotAnalytics.css";
 
 function ChatbotAnalytics() {
@@ -31,7 +32,7 @@ function ChatbotAnalytics() {
           <h1>Chat Analytics</h1>
           <p>Monitor chatbot usage, unanswered volume, and intent patterns.</p>
         </div>
-        <button type="button" onClick={() => navigate("/dashboard")}>Back</button>
+        <BackButton />
       </div>
 
       {loading ? (
