@@ -146,7 +146,7 @@ function AddFeaturedRowsForm({ mode }) {
           onChange={(e) => {
             const type = e.target.value;
             setForm({ ...form, type });
-            setPackageMode(type === "category" ? "parent" : "name");
+            setPackageMode(type === "category" ? "children" : "name");
             setSelectedItems([]);
             setDropdown("");
           }}
@@ -163,6 +163,17 @@ function AddFeaturedRowsForm({ mode }) {
           >
             <option value="name">Add by Package Name</option>
             <option value="subcategory">Add by Subcategory</option>
+          </select>
+        )}
+
+        {form.type === "category" && (
+          <select
+            className="frf-input"
+            value={packageMode}
+            onChange={(e) => { setPackageMode(e.target.value); setSelectedItems([]); setDropdown(""); }}
+          >
+            <option value="children">Show selected category subcategories</option>
+            <option value="parent">Show selected parent categories directly</option>
           </select>
         )}
 
