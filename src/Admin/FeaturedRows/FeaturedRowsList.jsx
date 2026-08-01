@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function FeaturedRowsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const { page, pageCount, pageItems, setPage } = usePagination(rows);
 
   useEffect(() => {
     const loadRows = async () => {
@@ -27,8 +29,9 @@ function FeaturedRowsList() {
   const handleDragEnd = (result) => {
     if (!result.destination) return;
     const items = Array.from(rows);
-    const [moved] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, moved);
+    const pageOffset = (page - 1) * 10;
+    const [moved] = items.splice(pageOffset + result.source.index, 1);
+    items.splice(pageOffset + result.destination.index, 0, moved);
     setRows(items.map((item, index) => ({ ...item, sequence: index + 1 })));
   };
 
@@ -87,7 +90,7 @@ function FeaturedRowsList() {
                         <td colSpan="6" className="fr-empty">No Rows Found</td>
                       </tr>
                     ) : (
-                      rows.map((r, index) => (
+                      pageItems.map((r, index) => (
                         <Draggable key={r.rowId || r.id} draggableId={r.rowId || r.id} index={index}>
                           {(dragProvided, snapshot) => (
                             <tr ref={dragProvided.innerRef} {...dragProvided.draggableProps} className={snapshot.isDragging ? "dragging" : ""}>
@@ -118,6 +121,7 @@ function FeaturedRowsList() {
             </Droppable>
           </DragDropContext>
         </div>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={rows.length} label="featured rows" />
       </div>
 
       {showDeleteModal && (
