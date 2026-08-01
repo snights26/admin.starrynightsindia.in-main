@@ -69,8 +69,10 @@ function AddFeaturedRowsForm({ mode }) {
     [categories]
   );
 
-  const currentList = form.type === "package"
-    ? packageMode === "name" ? packages : subcategories
+  const isPackageRow = form.type === "package" || form.type === "top10";
+  const isSubcategorySelection = form.type === "package" && packageMode === "subcategory";
+  const currentList = isPackageRow
+    ? isSubcategorySelection ? subcategories : packages
     : parentCategories;
 
   const codeOf = (item) => item.packageCode || item.code || item.categoryCode || item.id;
@@ -78,7 +80,7 @@ function AddFeaturedRowsForm({ mode }) {
 
   const handleAdd = () => {
     const item = currentList.find((entry) => codeOf(entry) === dropdown);
-    if (!item) return;
+    if (!item || (form.type === "top10" && selectedItems.length >= 10)) return;
     const itemCode = codeOf(item);
     if (selectedItems.some((selected) => selected.id === itemCode)) return;
     setSelectedItems([...selectedItems, {
@@ -94,6 +96,11 @@ function AddFeaturedRowsForm({ mode }) {
   };
 
   const handleSubmit = async () => {
+    if (form.type === "top10" && selectedItems.length !== 10) {
+      alert("A Top 10 row must contain exactly 10 packages.");
+      return;
+    }
+
     const payload = {
       rowId: form.rowId,
       title: form.title,
@@ -145,6 +152,7 @@ function AddFeaturedRowsForm({ mode }) {
         >
           <option value="package">Package Row</option>
           <option value="category">Category Row</option>
+          <option value="top10">Top 10 Package Row</option>
         </select>
 
         {form.type === "package" && (
@@ -167,7 +175,7 @@ function AddFeaturedRowsForm({ mode }) {
         <div className="frf-add-section">
           <select className="frf-select" value={dropdown} onChange={(e) => setDropdown(e.target.value)}>
             <option value="">
-              {form.type === "package" ? packageMode === "name" ? "Select Package" : "Select Subcategory" : "Select Category"}
+              {isPackageRow ? isSubcategorySelection ? "Select Subcategory" : "Select Package" : "Select Category"}
             </option>
             {currentList
               .filter((item) => !selectedItems.some((selected) => selected.id === codeOf(item)))
