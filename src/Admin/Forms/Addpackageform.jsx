@@ -275,7 +275,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     const heroImages = await Promise.all(
       form.heroImages.filter(Boolean).map((img) => uploadFile(img, "packages"))
     );
-    const thumbnailUrl = await uploadFile(form.thumbnail, "packages");
+    const thumbnailUrl = await uploadFile(form.thumbnail, "packages", { imageOnly: true });
     const itinerary = await Promise.all(form.itinerary.map(async (day) => ({
       ...day,
       imageUrls: await Promise.all((day.imageUrls || []).filter(Boolean)
@@ -444,7 +444,11 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
 
         <div className="thumbnail-slot">
           {getImageSrc(form.thumbnail) ? <img src={getImageSrc(form.thumbnail)} alt="" /> : <span>Upload Thumbnail</span>}
-          <input type="file" onChange={(e) => setForm({ ...form, thumbnail: e.target.files[0] })} />
+          <input
+            type="file"
+            accept={IMAGE_FILE_ACCEPT}
+            onChange={(e) => setForm({ ...form, thumbnail: e.target.files[0] })}
+          />
         </div>
       </div>
 

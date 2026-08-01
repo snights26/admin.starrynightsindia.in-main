@@ -63,7 +63,7 @@ function Addcategoryfroms({ mode }) {
 
   const handleSubmit = async () => {
     try {
-      const thumbnailUrl = await uploadFile(form.thumbnail, "categories");
+      const thumbnailUrl = await uploadFile(form.thumbnail, "categories", { imageOnly: true });
       const payload = {
         categoryCode: form.categoryCode,
         categoryName: form.categoryName,
@@ -116,7 +116,7 @@ function Addcategoryfroms({ mode }) {
         <input
           type="file"
           name="thumbnail"
-          accept="image/*"
+          accept={IMAGE_FILE_ACCEPT}
           className="category-form-input"
           onChange={handleChange}
         />
