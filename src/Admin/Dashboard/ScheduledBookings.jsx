@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import "react-calendar/dist/Calendar.css";
 import "./ScheduledBookings.css";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function ScheduledBookings() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ function ScheduledBookings() {
       (b.tourId || b.id || "").toLowerCase().includes(searchTourId.toLowerCase())
     );
   }
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredBookings, 5);
 
   return (
     <div className="schedule-container">
@@ -74,7 +76,7 @@ function ScheduledBookings() {
 
           <tbody>
             {filteredBookings.length > 0 ? (
-              filteredBookings.map((b) => (
+              pageItems.map((b) => (
                 <tr key={b.tourId || b.id}>
                   <td>{b.tourId || b.id}</td>
                   <td>{b.name || b.packageName}</td>
@@ -102,6 +104,7 @@ function ScheduledBookings() {
             )}
           </tbody>
         </table>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredBookings.length} label="bookings" />
       </div>
 
       <div className="calendar-box">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 import "./EnquiryList.css";
 
 function EnquiryList() {
@@ -70,6 +71,7 @@ function EnquiryList() {
       (e.name || "").toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => new Date(b.created) - new Date(a.created));
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredEnquiries);
 
   /* VIEW */
   const viewMessage = (item) => {
@@ -188,7 +190,7 @@ ${e.message}`;
         </thead>
 
         <tbody>
-          {filteredEnquiries.map((e) => (
+          {pageItems.map((e) => (
             <tr key={e.inquiryId}>
               <td>{e.inquiryId}</td>
               <td>{e.name}</td>
@@ -208,6 +210,7 @@ ${e.message}`;
           ))}
         </tbody>
       </table>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredEnquiries.length} label="enquiries" />
 
       {/* FULL POPUP */}
       {showMessage && selected && (

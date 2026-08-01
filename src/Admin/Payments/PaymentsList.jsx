@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 import "./PaymentsList.css";
 
 export default function PaymentsList() {
@@ -8,6 +9,7 @@ export default function PaymentsList() {
   const navigate = useNavigate();
 
   const [payments, setPayments] = useState([]);
+  const { page, pageCount, pageItems, setPage } = usePagination(payments);
 
   useEffect(() => {
 
@@ -102,7 +104,7 @@ export default function PaymentsList() {
 
           <tbody>
 
-            {payments.map((payment) => {
+            {pageItems.map((payment) => {
 
               const dueAmount = Number(payment.totalAmount || 0) - Number(payment.paidAmount || 0);
 
@@ -169,6 +171,7 @@ export default function PaymentsList() {
         </table>
 
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={payments.length} label="payments" />
 
       {/* BACK BUTTON */}
 

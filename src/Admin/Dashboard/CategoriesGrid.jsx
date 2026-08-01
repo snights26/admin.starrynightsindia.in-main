@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import "./CategoriesGrid.css";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 const categoryName = (category) => category?.title || category?.name || "";
 const categoryInitial = (category) => categoryName(category).trim().charAt(0).toUpperCase() || "?";
@@ -67,6 +68,7 @@ export default function CategoriesGrid() {
   const title = isSubcategoryView
     ? `${categoryName(selectedParent)} Subcategories`
     : "Category Management";
+  const { page, pageCount, pageItems, setPage } = usePagination(visibleCategories, 10);
 
   return (
     <div className="admin-grid-container">
@@ -109,7 +111,7 @@ export default function CategoriesGrid() {
                   {isSubcategoryView ? "No subcategories found" : "No parent categories found"}
                 </td>
               </tr>
-            ) : visibleCategories.map((category) => {
+            ) : pageItems.map((category) => {
               const children = Array.isArray(category.children) ? category.children : [];
               return (
                 <tr key={category.code} className={isSubcategoryView ? "category-dashboard-row" : ""}>
@@ -155,6 +157,7 @@ export default function CategoriesGrid() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={visibleCategories.length} label={isSubcategoryView ? "subcategories" : "parent categories"} />
     </div>
   );
 }

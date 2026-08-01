@@ -2,10 +2,13 @@ import "./PackagesList.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 
 function PackagesList() {
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
+  const { page, pageCount, pageItems, setPage } = usePagination(packages);
 
   const loadPackages = async () => {
     try {
@@ -35,7 +38,7 @@ function PackagesList() {
     <div className="pkg-list-container">
       <div className="pkg-header">
         <div className="header-left">
-          <button onClick={() => navigate("/dashboard")}>Back</button>
+          <BackButton />
           <h2>Packages</h2>
         </div>
 
@@ -52,7 +55,7 @@ function PackagesList() {
         </thead>
 
         <tbody>
-          {packages.map((pkg) => {
+          {pageItems.map((pkg) => {
             const code = pkg.packageCode || pkg.code || pkg.id;
             return (
               <tr key={code}>
@@ -69,6 +72,7 @@ function PackagesList() {
           })}
         </tbody>
       </table>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={packages.length} label="packages" />
     </div>
   );
 }

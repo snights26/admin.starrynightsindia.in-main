@@ -2,11 +2,13 @@ import "./NotificationsList.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function NotificationsList() {
 
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
+  const { page, pageCount, pageItems, setPage } = usePagination(notifications);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -73,7 +75,7 @@ function NotificationsList() {
           </thead>
 
           <tbody>
-            {notifications.map((n) => (
+            {pageItems.map((n) => (
               <tr key={n.id}>
                 <td>{n.id}</td>
                 <td>{n.title}</td>
@@ -111,6 +113,7 @@ function NotificationsList() {
         </table>
 
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={notifications.length} label="notifications" />
 
     </div>
   );

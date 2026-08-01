@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function FirstRowToursList() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function FirstRowToursList() {
   const [allPackages, setAllPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState("");
   const [message, setMessage] = useState("");
+  const { page, pageCount, pageItems, setPage } = usePagination(selectedList);
 
   const showToast = (msg) => {
     setMessage(msg);
@@ -129,9 +131,9 @@ function FirstRowToursList() {
           </thead>
 
           <tbody>
-            {selectedList.length > 0 ? selectedList.map((item, index) => (
+            {selectedList.length > 0 ? pageItems.map((item, index) => (
               <tr key={codeOf(item)}>
-                <td><span className="fr-row-number">{String(index + 1).padStart(2, "0")}</span></td>
+                <td><span className="fr-row-number">{String((page - 1) * 10 + index + 1).padStart(2, "0")}</span></td>
                 <td><span className="fr-package-name">{item.title || item.name}</span></td>
                 <td>
                   <button className="fr-remove-btn" onClick={() => handleRemove(codeOf(item))}>
@@ -146,6 +148,7 @@ function FirstRowToursList() {
             )}
           </tbody>
         </table>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={selectedList.length} label="featured packages" />
       </div>
 
       {message && <div className="fr-toast">{message}</div>}

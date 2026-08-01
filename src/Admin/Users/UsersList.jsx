@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 import "./UsersList.css";
 
 function UsersList() {
@@ -39,6 +41,7 @@ function UsersList() {
       (value || "").toLowerCase().includes(searchId.toLowerCase())
     )
   );
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredUsers);
 
   const confirmDelete = (user) => {
     setFeedback(null);
@@ -109,7 +112,7 @@ function UsersList() {
             className="ul-search"
           />
 
-          <button onClick={() => navigate("/dashboard")}>Back</button>
+          <BackButton />
         </div>
       </div>
 
@@ -140,7 +143,7 @@ function UsersList() {
                 <td className="ul-empty" colSpan="8">No unauthorized users found.</td>
               </tr>
             )}
-            {filteredUsers.map((u) => (
+            {pageItems.map((u) => (
               <tr key={u.id || u.userId}>
                 <td>{u.userId}</td>
                 <td>{u.name}</td>
@@ -163,6 +166,7 @@ function UsersList() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredUsers.length} label="users" />
     </div>
   );
 }

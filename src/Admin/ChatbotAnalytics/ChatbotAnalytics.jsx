@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 import "./ChatbotAnalytics.css";
 
 function ChatbotAnalytics() {
@@ -18,6 +19,10 @@ function ChatbotAnalytics() {
   const escalationRate = analytics?.escalationRate
     ? `${Math.round(analytics.escalationRate * 100)}%`
     : "0%";
+  const intents = analytics?.intentBreakdown || [];
+  const questions = analytics?.topQuestions || [];
+  const intentPagination = usePagination(intents);
+  const questionPagination = usePagination(questions);
 
   return (
     <div className="chat-analytics-page">
@@ -53,11 +58,11 @@ function ChatbotAnalytics() {
           <div className="chat-analytics-grid">
             <section>
               <h2>Intent Breakdown</h2>
-              {(analytics.intentBreakdown || []).length === 0 ? (
+              {intents.length === 0 ? (
                 <p className="chat-analytics-muted">No intent data yet.</p>
               ) : (
                 <div className="chat-analytics-list">
-                  {analytics.intentBreakdown.map((item) => (
+                  {intentPagination.pageItems.map((item) => (
                     <div key={item.intent}>
                       <span>{item.intent}</span>
                       <strong>{item.count}</strong>
@@ -65,15 +70,16 @@ function ChatbotAnalytics() {
                   ))}
                 </div>
               )}
+              <Pagination {...intentPagination} itemCount={intents.length} label="intents" />
             </section>
 
             <section>
               <h2>Top Questions</h2>
-              {(analytics.topQuestions || []).length === 0 ? (
+              {questions.length === 0 ? (
                 <p className="chat-analytics-muted">No repeated questions yet.</p>
               ) : (
                 <div className="chat-analytics-list questions">
-                  {analytics.topQuestions.map((item) => (
+                  {questionPagination.pageItems.map((item) => (
                     <div key={item.question}>
                       <span>{item.question}</span>
                       <strong>{item.count}</strong>
@@ -81,6 +87,7 @@ function ChatbotAnalytics() {
                   ))}
                 </div>
               )}
+              <Pagination {...questionPagination} itemCount={questions.length} label="questions" />
             </section>
           </div>
         </>

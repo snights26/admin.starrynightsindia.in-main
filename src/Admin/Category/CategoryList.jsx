@@ -2,6 +2,8 @@ import "./CategoryList.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
+import BackButton from "../../Common/BackButton";
 
 const isSubcategory = (category) => Boolean(category.isSub || category.isSubcategory);
 
@@ -82,6 +84,7 @@ function CategoryList() {
     setSubcategoryFilter("");
     setSearch("");
   };
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredCategories);
 
   return (
     <div className="category-list-page">
@@ -92,9 +95,7 @@ function CategoryList() {
         </div>
 
         <div className="category-list-header-actions">
-          <button className="category-list-back-btn" onClick={() => navigate("/dashboard")}>
-            Back
-          </button>
+          <BackButton className="category-list-back-btn" />
           <button className="category-list-add-btn" onClick={() => navigate("/admin/categories/add")}>
             + Add Category
           </button>
@@ -169,7 +170,7 @@ function CategoryList() {
               <tr>
                 <td colSpan="5" className="category-list-empty">No categories found</td>
               </tr>
-            ) : filteredCategories.map((c) => (
+            ) : pageItems.map((c) => (
               <tr key={c.code}>
                 <td className="code">{c.code}</td>
                 <td className="name">{c.name}</td>
@@ -194,6 +195,7 @@ function CategoryList() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredCategories.length} label="categories" />
 
     </div>
   );
