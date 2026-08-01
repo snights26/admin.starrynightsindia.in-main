@@ -35,7 +35,6 @@ import EditCategory from "./Admin/Category/EditCategory";
 
 
 
-import FirstRowToursList from "./Admin/FirstRowTours/FirstRowToursList";
 
 import GalleryList from "./Admin/Gallery/GalleryList";
 import AddGallery from "./Admin/Gallery/AddGallery";
@@ -56,7 +55,6 @@ import EditKeyword from "./Admin/Keywords/EditKeyword";
 import UnansweredQuestions from "./Admin/Unanswered/UnansweredQuestions";
 import ChatbotAnalytics from "./Admin/ChatbotAnalytics/ChatbotAnalytics";
 
-import Top10 from "./Admin/Top10/Top10";
 import Quotation from "./Admin/GetQuotation/GetQuotation";
 
 /* 🔥 FEATURED ROWS IMPORT */
@@ -245,12 +243,6 @@ function AppWrapper() {
 
        
 
-        {/* FIRST ROW */}
-        <Route
-          path="/admin/first-row-tours"
-          element={<ProtectedRoute><FirstRowToursList /></ProtectedRoute>}
-        />
-
         {/* GALLERY */}
         <Route
           path="/admin/gallery"
@@ -330,12 +322,6 @@ function AppWrapper() {
         <Route
           path="/admin/chat-analytics"
           element={<ProtectedRoute><ChatbotAnalytics /></ProtectedRoute>}
-        />
-
-        {/* TOP10 */}
-        <Route
-          path="/admin/top10"
-          element={<ProtectedRoute><Top10 /></ProtectedRoute>}
         />
 
         {/* 🔥 FEATURED ROWS */}

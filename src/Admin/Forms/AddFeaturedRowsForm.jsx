@@ -69,7 +69,7 @@ function AddFeaturedRowsForm({ mode }) {
     [categories]
   );
 
-  const isPackageRow = form.type === "package" || form.type === "top10";
+  const isPackageRow = form.type === "package";
   const isSubcategorySelection = form.type === "package" && packageMode === "subcategory";
   const currentList = isPackageRow
     ? isSubcategorySelection ? subcategories : packages
@@ -80,7 +80,7 @@ function AddFeaturedRowsForm({ mode }) {
 
   const handleAdd = () => {
     const item = currentList.find((entry) => codeOf(entry) === dropdown);
-    if (!item || (form.type === "top10" && selectedItems.length >= 10)) return;
+    if (!item) return;
     const itemCode = codeOf(item);
     if (selectedItems.some((selected) => selected.id === itemCode)) return;
     setSelectedItems([...selectedItems, {
@@ -96,11 +96,6 @@ function AddFeaturedRowsForm({ mode }) {
   };
 
   const handleSubmit = async () => {
-    if (form.type === "top10" && selectedItems.length !== 10) {
-      alert("A Top 10 row must contain exactly 10 packages.");
-      return;
-    }
-
     const payload = {
       rowId: form.rowId,
       title: form.title,
@@ -148,11 +143,16 @@ function AddFeaturedRowsForm({ mode }) {
         <select
           className="frf-input"
           value={form.type}
-          onChange={(e) => { setForm({ ...form, type: e.target.value }); setSelectedItems([]); setDropdown(""); }}
+          onChange={(e) => {
+            const type = e.target.value;
+            setForm({ ...form, type });
+            setPackageMode(type === "category" ? "parent" : "name");
+            setSelectedItems([]);
+            setDropdown("");
+          }}
         >
           <option value="package">Package Row</option>
           <option value="category">Category Row</option>
-          <option value="top10">Top 10 Package Row</option>
         </select>
 
         {form.type === "package" && (

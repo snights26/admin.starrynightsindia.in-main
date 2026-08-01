@@ -23,9 +23,7 @@ const moduleSections = [
       "Gallery",
       "Hero Sliders",
       "Homepage Statistics",
-      "Featured Rows",
-      "FirstRow Tours",
-      "Top10"
+      "Featured Rows"
     ]
   },
   {
@@ -52,7 +50,6 @@ function AdminModulesPanel() {
     "Package": "/admin/packages",
     "Get Quotation": "/admin/GetQuotation",
     "Category": "/admin/categories",
-    "FirstRow Tours": "/admin/first-row-tours",
     "Gallery": "/admin/gallery",
     "Hero Sliders": "/admin/hero-sliders",
     "Homepage Statistics": "/admin/homepage-statistics",
@@ -60,7 +57,6 @@ function AdminModulesPanel() {
     "Keywords": "/admin/keywords",
     "Unanswered Questions": "/admin/unanswered",
     "Chat Analytics": "/admin/chat-analytics",
-    "Top10": "/admin/top10",
     "Featured Rows": "/admin/featured-rows"
   };
 
