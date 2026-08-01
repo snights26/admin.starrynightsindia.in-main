@@ -75,5 +75,8 @@ export const resolveAssetUrl = (url) => {
   if (url.startsWith("/api/")) {
     return `${apiBaseUrl.replace(/\/api$/, "")}${url}`;
   }
+  if (url.startsWith("/uploads/")) {
+    return `${apiBaseUrl}${url}`;
+  }
   return url;
 };
