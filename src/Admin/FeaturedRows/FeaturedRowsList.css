@@ -68,42 +68,65 @@
 
 /* ADD */
 
-.fr-actions button:nth-child(1) {
+.fr-actions .fr-add {
   background: #e50914;
   color: white;
 }
 
-.fr-actions button:nth-child(1):hover {
+.fr-actions .fr-add:hover {
   background: #ff1f2d;
   transform: translateY(-1px);
 }
 
 
+/* REORDER */
+
+.fr-actions .fr-reorder {
+  background: #25354f;
+  color: #e2e8f0;
+  border: 1px solid #3b4d6b;
+}
+
+.fr-actions .fr-reorder:hover:not(:disabled) {
+  background: #314665;
+}
+
 /* SAVE */
 
-.fr-actions button:nth-child(2) {
+.fr-actions .fr-save-order {
   background: #0f9d58;
   color: white;
 }
 
-.fr-actions button:nth-child(2):hover {
+.fr-actions .fr-save-order:hover:not(:disabled) {
   background: #12b868;
   transform: translateY(-1px);
+}
+
+.fr-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 
 /* BACK */
 
-.fr-actions button:nth-child(3) {
+.fr-actions .fr-back {
   background: #1b1b1b;
   color: #d0d0d0;
 
   border: 1px solid #2a2a2a;
 }
 
-.fr-actions button:nth-child(3):hover {
+.fr-actions .fr-back:hover {
   background: #252525;
   color: white;
+}
+
+.fr-order-hint {
+  margin: -4px 0 16px;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 

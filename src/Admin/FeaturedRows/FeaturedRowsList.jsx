@@ -11,6 +11,7 @@ function FeaturedRowsList() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [search, setSearch] = useState("");
+  const [isReordering, setIsReordering] = useState(false);
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return rows;
@@ -34,11 +35,10 @@ function FeaturedRowsList() {
   }, []);
 
   const handleDragEnd = (result) => {
-    if (!result.destination || search.trim()) return;
+    if (!isReordering || !result.destination) return;
     const items = Array.from(rows);
-    const pageOffset = (page - 1) * 5;
-    const [moved] = items.splice(pageOffset + result.source.index, 1);
-    items.splice(pageOffset + result.destination.index, 0, moved);
+    const [moved] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, moved);
     setRows(items.map((item, index) => ({ ...item, sequence: index + 1 })));
   };
 
@@ -47,6 +47,7 @@ function FeaturedRowsList() {
       rowId: row.rowId || row.id,
       sequence: row.sequence
     })));
+    setIsReordering(false);
   };
 
   const deleteRow = async () => {
@@ -69,9 +70,18 @@ function FeaturedRowsList() {
         <div className="fr-header">
           <div className="fr-title">Featured Rows</div>
           <div className="fr-actions">
-            <button onClick={() => navigate("/admin/featured-rows/add")}>Add Row</button>
-            <button onClick={handleSaveOrder}>Save Order</button>
-            <button onClick={() => navigate("/dashboard")}>Back</button>
+            <button className="fr-add" onClick={() => navigate("/admin/featured-rows/add")}>Add Row</button>
+            <button
+              className="fr-reorder"
+              type="button"
+              disabled={Boolean(search.trim())}
+              title={search.trim() ? "Clear search before reordering rows." : undefined}
+              onClick={() => setIsReordering((current) => !current)}
+            >
+              {isReordering ? "Exit Reorder" : "Reorder All"}
+            </button>
+            <button className="fr-save-order" type="button" disabled={!isReordering} onClick={handleSaveOrder}>Save Order</button>
+            <button className="fr-back" onClick={() => navigate("/dashboard")}>Back</button>
           </div>
         </div>
 
@@ -80,8 +90,11 @@ function FeaturedRowsList() {
           type="search"
           placeholder="Search rows by ID, title, type, or visibility..."
           value={search}
+          disabled={isReordering}
           onChange={(event) => setSearch(event.target.value)}
         />
+
+        {isReordering && <p className="fr-order-hint">Drag any row to its required position, then select Save Order. Pagination is temporarily hidden so all rows can be ordered together.</p>}
 
         <div className="fr-table-wrapper">
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -105,8 +118,8 @@ function FeaturedRowsList() {
                         <td colSpan="6" className="fr-empty">No Rows Found</td>
                       </tr>
                     ) : (
-                      pageItems.map((r, index) => (
-                        <Draggable key={r.rowId || r.id} draggableId={r.rowId || r.id} index={index} isDragDisabled={Boolean(search.trim())}>
+                      (isReordering ? rows : pageItems).map((r, index) => (
+                        <Draggable key={r.rowId || r.id} draggableId={r.rowId || r.id} index={index} isDragDisabled={!isReordering}>
                           {(dragProvided, snapshot) => (
                             <tr ref={dragProvided.innerRef} {...dragProvided.draggableProps} className={snapshot.isDragging ? "dragging" : ""}>
                               <td {...dragProvided.dragHandleProps} className="fr-drag">::</td>
@@ -136,7 +149,7 @@ function FeaturedRowsList() {
             </Droppable>
           </DragDropContext>
         </div>
-        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredRows.length} label="featured rows" />
+        {!isReordering && <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredRows.length} label="featured rows" />}
       </div>
 
       {showDeleteModal && (
