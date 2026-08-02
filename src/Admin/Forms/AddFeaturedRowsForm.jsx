@@ -69,7 +69,7 @@ function AddFeaturedRowsForm({ mode }) {
     [categories]
   );
 
-  const isPackageRow = form.type === "package";
+  const isPackageRow = form.type === "package" || form.type === "top10";
   const isSubcategorySelection = form.type === "package" && packageMode === "subcategory";
   const currentList = isPackageRow
     ? isSubcategorySelection ? subcategories : packages
@@ -152,6 +152,7 @@ function AddFeaturedRowsForm({ mode }) {
           }}
         >
           <option value="package">Package Row</option>
+          <option value="top10">Top 10 Package Row</option>
           <option value="category">Category Row</option>
         </select>
 
