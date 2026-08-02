@@ -258,7 +258,8 @@ html[data-theme="light"] .quote-email-status.error {
 .quote-image-picker {
   position: relative;
   display: grid;
-  min-height: 76px;
+  aspect-ratio: 1;
+  min-height: 0;
   overflow: hidden;
   place-items: center;
   border: 1px dashed #3a4351;
@@ -268,7 +269,7 @@ html[data-theme="light"] .quote-email-status.error {
 
 .quote-image-picker img {
   width: 100%;
-  height: 76px;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -586,14 +587,14 @@ html[data-theme="light"] .itinerary-editor-day strong {
 
 .quote-day-image-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 88px);
   gap: 8px;
   margin-top: 10px;
 }
 
 .quote-day-image-grid img {
-  width: 100%;
-  height: 78px;
+  width: 88px;
+  height: 88px;
   display: block;
   border-radius: 6px;
   object-fit: cover;
@@ -616,8 +617,8 @@ html[data-theme="light"] .itinerary-editor-day strong {
 
 .hotel-grid img {
   display: block;
-  width: 100%;
-  height: 104px;
+  width: 100px;
+  height: 100px;
   margin: 0 0 10px;
   border-radius: 6px;
   object-fit: cover;
