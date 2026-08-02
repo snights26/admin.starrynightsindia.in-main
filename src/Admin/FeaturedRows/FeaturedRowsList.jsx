@@ -1,5 +1,5 @@
 import "./FeaturedRowsList.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../Utils/api";
@@ -10,7 +10,14 @@ function FeaturedRowsList() {
   const [rows, setRows] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const { page, pageCount, pageItems, setPage } = usePagination(rows);
+  const [search, setSearch] = useState("");
+  const filteredRows = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((row) => [row.rowId, row.id, row.title, row.rowTitle, row.type, row.visibleOn]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [rows, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredRows, 5, search);
 
   useEffect(() => {
     const loadRows = async () => {
@@ -27,9 +34,9 @@ function FeaturedRowsList() {
   }, []);
 
   const handleDragEnd = (result) => {
-    if (!result.destination) return;
+    if (!result.destination || search.trim()) return;
     const items = Array.from(rows);
-    const pageOffset = (page - 1) * 10;
+    const pageOffset = (page - 1) * 5;
     const [moved] = items.splice(pageOffset + result.source.index, 1);
     items.splice(pageOffset + result.destination.index, 0, moved);
     setRows(items.map((item, index) => ({ ...item, sequence: index + 1 })));
@@ -68,6 +75,14 @@ function FeaturedRowsList() {
           </div>
         </div>
 
+        <input
+          className="fr-search"
+          type="search"
+          placeholder="Search rows by ID, title, type, or visibility..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+
         <div className="fr-table-wrapper">
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="rows">
@@ -85,13 +100,13 @@ function FeaturedRowsList() {
                   </thead>
 
                   <tbody>
-                    {rows.length === 0 ? (
+                    {filteredRows.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="fr-empty">No Rows Found</td>
                       </tr>
                     ) : (
                       pageItems.map((r, index) => (
-                        <Draggable key={r.rowId || r.id} draggableId={r.rowId || r.id} index={index}>
+                        <Draggable key={r.rowId || r.id} draggableId={r.rowId || r.id} index={index} isDragDisabled={Boolean(search.trim())}>
                           {(dragProvided, snapshot) => (
                             <tr ref={dragProvided.innerRef} {...dragProvided.draggableProps} className={snapshot.isDragging ? "dragging" : ""}>
                               <td {...dragProvided.dragHandleProps} className="fr-drag">::</td>
@@ -121,7 +136,7 @@ function FeaturedRowsList() {
             </Droppable>
           </DragDropContext>
         </div>
-        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={rows.length} label="featured rows" />
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredRows.length} label="featured rows" />
       </div>
 
       {showDeleteModal && (

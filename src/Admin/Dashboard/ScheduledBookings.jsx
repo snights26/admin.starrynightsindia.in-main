@@ -11,7 +11,7 @@ function ScheduledBookings() {
 
   const [bookings, setBookings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [searchTourId, setSearchTourId] = useState("");
+  const [searchBookings, setSearchBookings] = useState("");
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -35,12 +35,14 @@ function ScheduledBookings() {
     filteredBookings = filteredBookings.filter((b) => b.date === formatDate(selectedDate));
   }
 
-  if (searchTourId.trim() !== "") {
-    filteredBookings = filteredBookings.filter((b) =>
-      (b.tourId || b.id || "").toLowerCase().includes(searchTourId.toLowerCase())
+  if (searchBookings.trim() !== "") {
+    const query = searchBookings.trim().toLowerCase();
+    filteredBookings = filteredBookings.filter((booking) =>
+      [booking.tourId, booking.id, booking.name, booking.packageName, booking.date, booking.pickupDate, booking.contact, booking.mobile, booking.status]
+        .some((value) => String(value || "").toLowerCase().includes(query))
     );
   }
-  const { page, pageCount, pageItems, setPage } = usePagination(filteredBookings, 5);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredBookings, 5, searchBookings);
 
   return (
     <div className="schedule-container">
@@ -54,10 +56,11 @@ function ScheduledBookings() {
             </button>
             <input
               type="text"
-              placeholder="Search Tour ID..."
+              type="search"
+              placeholder="Search bookings..."
               className="tour-search"
-              value={searchTourId}
-              onChange={(e) => setSearchTourId(e.target.value)}
+              value={searchBookings}
+              onChange={(e) => setSearchBookings(e.target.value)}
             />
           </div>
         </div>

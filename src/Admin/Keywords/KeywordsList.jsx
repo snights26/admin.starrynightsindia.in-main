@@ -1,12 +1,21 @@
 import "./KeywordsList.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function KeywordsList() {
   const navigate = useNavigate();
   const [keywords, setKeywords] = useState([]);
   const [popup, setPopup] = useState(null);
+  const [search, setSearch] = useState("");
+  const filteredKeywords = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return keywords;
+    return keywords.filter((keyword) => [keyword.id, keyword.type, keyword.keywords, keyword.response]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [keywords, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredKeywords, 5, search);
 
   useEffect(() => {
     const loadKeywords = async () => {
@@ -48,6 +57,14 @@ function KeywordsList() {
         </div>
       </div>
 
+      <input
+        className="keywords-search"
+        type="search"
+        placeholder="Search by keyword, type, response, or ID..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+
       <div className="keywords-table-wrapper">
         <table className="keywords-table">
           <thead>
@@ -61,7 +78,9 @@ function KeywordsList() {
           </thead>
 
           <tbody>
-            {keywords.map((k) => (
+            {filteredKeywords.length === 0 ? (
+              <tr><td colSpan="5" className="keywords-empty">No keywords found.</td></tr>
+            ) : pageItems.map((k) => (
               <tr key={k.id}>
                 <td>{k.id}</td>
                 <td>{k.type}</td>
@@ -82,6 +101,7 @@ function KeywordsList() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredKeywords.length} label="keywords" />
 
       {popup && <div className={`keywords-popup ${popup.type}`}>{popup.message}</div>}
     </div>

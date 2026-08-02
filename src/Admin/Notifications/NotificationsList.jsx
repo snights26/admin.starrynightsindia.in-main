@@ -1,6 +1,6 @@
 import "./NotificationsList.css";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
 
@@ -8,7 +8,14 @@ function NotificationsList() {
 
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
-  const { page, pageCount, pageItems, setPage } = usePagination(notifications);
+  const [search, setSearch] = useState("");
+  const filteredNotifications = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return notifications;
+    return notifications.filter((notification) => [notification.id, notification.notificationId, notification.title, notification.target, notification.message]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [notifications, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredNotifications, 5, search);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -60,6 +67,14 @@ function NotificationsList() {
 
         </div>
       </div>
+
+      <input
+        className="notification-list-search"
+        type="search"
+        placeholder="Search notifications by ID, title, or target..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
 
       <div className="notification-list-table-wrapper">
 
@@ -113,7 +128,7 @@ function NotificationsList() {
         </table>
 
       </div>
-      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={notifications.length} label="notifications" />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredNotifications.length} label="notifications" />
 
     </div>
   );

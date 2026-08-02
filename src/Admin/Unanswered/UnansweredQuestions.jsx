@@ -1,12 +1,21 @@
 import "./UnansweredQuestions.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function UnansweredQuestions() {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [popup, setPopup] = useState(null);
+  const [search, setSearch] = useState("");
+  const filteredQuestions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return questions;
+    return questions.filter((question) => [question.id, question.question, question.response]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [questions, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredQuestions, 5, search);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -64,6 +73,14 @@ function UnansweredQuestions() {
         </button>
       </div>
 
+      <input
+        className="unanswered-search"
+        type="search"
+        placeholder="Search by question, response, or ID..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+
       <div className="unanswered-table-wrapper">
         <table className="unanswered-table">
           <thead>
@@ -76,7 +93,9 @@ function UnansweredQuestions() {
           </thead>
 
           <tbody>
-            {questions.map((q) => (
+            {filteredQuestions.length === 0 ? (
+              <tr><td colSpan="4" className="unanswered-empty">No unanswered questions found.</td></tr>
+            ) : pageItems.map((q) => (
               <tr key={q.id}>
                 <td className="qid">{q.id}</td>
                 <td className="question-text">{q.question}</td>
@@ -99,6 +118,7 @@ function UnansweredQuestions() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredQuestions.length} label="questions" />
 
       {popup && <div className={`unanswered-popup ${popup.type}`}>{popup.message}</div>}
     </div>

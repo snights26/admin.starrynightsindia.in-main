@@ -9,6 +9,12 @@
   font-family: "Poppins", sans-serif;
 }
 
+.pkg-search {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 16px auto;
+}
+
 
 /* HEADER */
 

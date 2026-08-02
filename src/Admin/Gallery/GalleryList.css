@@ -6,6 +6,12 @@
   font-family: "Poppins", sans-serif;
 }
 
+.gallery-list-search {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 16px auto;
+}
+
 .gallery-list-header {
   display: flex;
   justify-content: space-between;

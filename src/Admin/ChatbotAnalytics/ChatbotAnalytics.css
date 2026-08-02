@@ -7,6 +7,11 @@
   box-sizing:border-box;
 }
 
+.chat-analytics-search {
+  width: min(100%, 480px);
+  margin: 20px 0;
+}
+
 .chat-analytics-header{
   display:flex;
   align-items:flex-start;

@@ -68,7 +68,7 @@ export default function CategoriesGrid() {
   const title = isSubcategoryView
     ? `${categoryName(selectedParent)} Subcategories`
     : "Category Management";
-  const { page, pageCount, pageItems, setPage } = usePagination(visibleCategories, 10);
+  const { page, pageCount, pageItems, setPage } = usePagination(visibleCategories, 5, search);
 
   return (
     <div className="admin-grid-container">

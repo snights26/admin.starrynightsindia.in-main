@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiEdit2, FiEye, FiEyeOff, FiPlus, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
+import Pagination, { usePagination } from "../../Common/Pagination";
 import "./HomepageStatistics.css";
 
 const formatDate = (value) => {
@@ -17,6 +18,7 @@ export default function HomepageStatisticsList() {
   const [statistics, setStatistics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   const loadStatistics = useCallback(async () => {
     setLoading(true);
@@ -41,6 +43,13 @@ export default function HomepageStatisticsList() {
     () => [...statistics].sort((left, right) => (left.displayOrder ?? 1) - (right.displayOrder ?? 1)),
     [statistics]
   );
+  const filteredStatistics = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return orderedStatistics;
+    return orderedStatistics.filter((statistic) => [statistic.title, statistic.value, statistic.displayOrder, statistic.active ? "active" : "inactive"]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [orderedStatistics, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredStatistics, 5, search);
 
   const toggleStatus = async (statistic) => {
     try {
@@ -82,6 +91,14 @@ export default function HomepageStatisticsList() {
 
         {error && <div className="homepage-statistics-alert" role="alert">{error}</div>}
 
+        <input
+          className="homepage-statistics-search"
+          type="search"
+          placeholder="Search statistics by title, value, order, or status..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+
         <div className="homepage-statistics-table-wrap">
           <table className="homepage-statistics-table">
             <thead>
@@ -98,9 +115,9 @@ export default function HomepageStatisticsList() {
             <tbody>
               {loading ? (
                 <tr><td colSpan="7" className="homepage-statistics-empty">Loading homepage statistics...</td></tr>
-              ) : orderedStatistics.length === 0 ? (
-                <tr><td colSpan="7" className="homepage-statistics-empty">No homepage statistics found. Add one to publish it on the homepage.</td></tr>
-              ) : orderedStatistics.map((statistic) => (
+              ) : filteredStatistics.length === 0 ? (
+                <tr><td colSpan="7" className="homepage-statistics-empty">No homepage statistics match your search.</td></tr>
+              ) : pageItems.map((statistic) => (
                 <tr key={statistic.id}>
                   <td><span className="homepage-statistics-order">{statistic.displayOrder}</span></td>
                   <td className="homepage-statistics-title">{statistic.title}</td>
@@ -133,6 +150,7 @@ export default function HomepageStatisticsList() {
             </tbody>
           </table>
         </div>
+        <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredStatistics.length} label="statistics" />
       </section>
     </main>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
@@ -10,7 +10,14 @@ export default function PaymentsList() {
   const navigate = useNavigate();
 
   const [payments, setPayments] = useState([]);
-  const { page, pageCount, pageItems, setPage } = usePagination(payments);
+  const [search, setSearch] = useState("");
+  const filteredPayments = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return payments;
+    return payments.filter((payment) => [payment.id, payment.tourId, payment.customerName, payment.name, payment.paymentDate, payment.status]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [payments, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredPayments, 5, search);
 
   useEffect(() => {
 
@@ -71,6 +78,14 @@ export default function PaymentsList() {
       {/* ADD PAYMENT BUTTON */}
 
       <div className="payments-actions">
+
+        <input
+          className="payments-search"
+          type="search"
+          placeholder="Search payments by tour ID, customer, or date..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
 
         <button
           className="add-payment-btn"
@@ -172,7 +187,7 @@ export default function PaymentsList() {
         </table>
 
       </div>
-      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={payments.length} label="payments" />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredPayments.length} label="payments" />
 
       {/* BACK BUTTON */}
 

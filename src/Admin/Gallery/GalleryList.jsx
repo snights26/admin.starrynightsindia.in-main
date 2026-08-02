@@ -1,12 +1,21 @@
 import "./GalleryList.css";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import api from "../../Utils/api";
 import { resolveAssetUrl } from "../../Utils/fileUpload";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 function GalleryList() {
   const navigate = useNavigate();
   const [images, setImages] = useState([]);
+  const [search, setSearch] = useState("");
+  const filteredImages = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return images;
+    return images.filter((image) => [image.imageId, image.id, image.title, image.uploadedByType, image.userId, image.userName]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [images, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredImages, 5, search);
 
   useEffect(() => {
     const loadGallery = async () => {
@@ -77,6 +86,14 @@ function GalleryList() {
         </div>
       </div>
 
+      <input
+        className="gallery-list-search"
+        type="search"
+        placeholder="Search by image ID, title, uploader, or user..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+
       <div className="gallery-list-table-wrapper">
         <table className="gallery-list-table">
           <thead>
@@ -93,14 +110,14 @@ function GalleryList() {
           </thead>
 
           <tbody>
-            {images.length === 0 ? (
+            {filteredImages.length === 0 ? (
               <tr>
                 <td colSpan="8" className="gallery-empty">
                   No images found
                 </td>
               </tr>
             ) : (
-              images.map((img) => {
+              pageItems.map((img) => {
                 const imageId = getImageId(img);
                 const canFeature = canFeatureImage(img);
                 const isUserUpload = String(img.uploadedByType || "").toLowerCase() === "user";
@@ -194,6 +211,7 @@ function GalleryList() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredImages.length} label="images" />
     </div>
   );
 }

@@ -7,6 +7,12 @@
   font-family: "Poppins", sans-serif;
 }
 
+.notification-list-search {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 16px auto;
+}
+
 /* HEADER */
 .notification-list-header {
   display: flex;

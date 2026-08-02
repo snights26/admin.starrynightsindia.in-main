@@ -8,6 +8,11 @@
   font-family: "Poppins", sans-serif;
 }
 
+.payments-search {
+  width: min(100%, 420px);
+  min-height: 42px;
+}
+
 
 /* HEADER */
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
@@ -9,6 +9,7 @@ function ChatbotAnalytics() {
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     api.get("/chatbot/analytics")
@@ -22,8 +23,16 @@ function ChatbotAnalytics() {
     : "0%";
   const intents = analytics?.intentBreakdown || [];
   const questions = analytics?.topQuestions || [];
-  const intentPagination = usePagination(intents);
-  const questionPagination = usePagination(questions);
+  const filteredIntents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return query ? intents.filter((item) => String(item.intent || "").toLowerCase().includes(query)) : intents;
+  }, [intents, search]);
+  const filteredQuestions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return query ? questions.filter((item) => String(item.question || "").toLowerCase().includes(query)) : questions;
+  }, [questions, search]);
+  const intentPagination = usePagination(filteredIntents, 5, search);
+  const questionPagination = usePagination(filteredQuestions, 5, search);
 
   return (
     <div className="chat-analytics-page">
@@ -56,10 +65,18 @@ function ChatbotAnalytics() {
             </div>
           </div>
 
+          <input
+            className="chat-analytics-search"
+            type="search"
+            placeholder="Search intents and top questions..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
           <div className="chat-analytics-grid">
             <section>
               <h2>Intent Breakdown</h2>
-              {intents.length === 0 ? (
+              {filteredIntents.length === 0 ? (
                 <p className="chat-analytics-muted">No intent data yet.</p>
               ) : (
                 <div className="chat-analytics-list">
@@ -71,12 +88,12 @@ function ChatbotAnalytics() {
                   ))}
                 </div>
               )}
-              <Pagination {...intentPagination} itemCount={intents.length} label="intents" />
+              <Pagination {...intentPagination} itemCount={filteredIntents.length} label="intents" />
             </section>
 
             <section>
               <h2>Top Questions</h2>
-              {questions.length === 0 ? (
+              {filteredQuestions.length === 0 ? (
                 <p className="chat-analytics-muted">No repeated questions yet.</p>
               ) : (
                 <div className="chat-analytics-list questions">
@@ -88,7 +105,7 @@ function ChatbotAnalytics() {
                   ))}
                 </div>
               )}
-              <Pagination {...questionPagination} itemCount={questions.length} label="questions" />
+              <Pagination {...questionPagination} itemCount={filteredQuestions.length} label="questions" />
             </section>
           </div>
         </>

@@ -11,6 +11,19 @@
   box-sizing: border-box;
 }
 
+.unanswered-search {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 16px auto;
+}
+
+.unanswered-empty,
+.keywords-empty,
+.sb-empty {
+  padding: 28px;
+  text-align: center;
+}
+
 /* =========================
    HEADER
 ========================= */

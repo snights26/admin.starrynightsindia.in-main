@@ -1,5 +1,5 @@
 import "./PackagesList.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
@@ -8,7 +8,14 @@ import BackButton from "../../Common/BackButton";
 function PackagesList() {
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
-  const { page, pageCount, pageItems, setPage } = usePagination(packages);
+  const [search, setSearch] = useState("");
+  const filteredPackages = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return packages;
+    return packages.filter((pkg) => [pkg.packageCode, pkg.code, pkg.id, pkg.title, pkg.name, pkg.heroTitle, pkg.brandName]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [packages, search]);
+  const { page, pageCount, pageItems, setPage } = usePagination(filteredPackages, 5, search);
 
   const loadPackages = async () => {
     try {
@@ -45,6 +52,14 @@ function PackagesList() {
         <button onClick={() => navigate("/admin/packages/new")}>+ Add Package</button>
       </div>
 
+      <input
+        className="pkg-search"
+        type="search"
+        placeholder="Search by package ID, title, or brand..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+
       <table className="pkg-table">
         <thead>
           <tr>
@@ -72,7 +87,7 @@ function PackagesList() {
           })}
         </tbody>
       </table>
-      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={packages.length} label="packages" />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} itemCount={filteredPackages.length} label="packages" />
     </div>
   );
 }

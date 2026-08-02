@@ -11,6 +11,17 @@
   box-sizing: border-box;
 }
 
+.keywords-search {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 16px auto;
+}
+
+.keywords-empty {
+  padding: 28px;
+  text-align: center;
+}
+
 /* =========================
    HEADER
 ========================= */
