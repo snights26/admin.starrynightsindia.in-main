@@ -5,9 +5,9 @@
 .pkg-form {
   background:
     radial-gradient(circle at 100% 0%, rgba(229, 9, 20, 0.09), transparent 25rem),
-    #0b0b0b;
+    var(--app-bg);
   padding: 24px;
-  color: white;
+  color: var(--app-text);
   max-width: 1180px;
   margin: auto;
   font-family: "Poppins", sans-serif;
@@ -21,10 +21,10 @@
 .pkg-form .form-section {
   margin-bottom: 20px;
   padding: 18px;
-  background: linear-gradient(145deg, rgba(25, 25, 26, 0.98), rgba(17, 17, 18, 0.98));
+  background: var(--app-surface-gradient);
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.025);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
 }
 
 .pkg-form .form-section h3 {
@@ -48,7 +48,7 @@
 
 .pkg-form .category-help {
   margin: 0 0 16px 14px;
-  color: #a9abb0;
+  color: var(--app-text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -96,10 +96,10 @@
 /* ======================= */
 
 .pkg-form .day-box {
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--app-border);
   padding: 10px;
   border-radius: 6px;
-  background: #111;
+  background: var(--app-card-soft);
   margin-bottom: 10px;
 }
 
@@ -122,13 +122,13 @@
 .pkg-form .image-slot {
   position: relative;
   height: 90px;
-  border: 1px dashed #333;
+  border: 1px dashed var(--app-input-border);
   border-radius: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  background: #0d0d0d;
+  background: var(--app-input);
 }
 
 .pkg-form .image-slot img {
@@ -226,7 +226,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
-  background: #0d0d0d;
+  background: var(--app-input);
 }
 
 .pkg-form .thumbnail-slot span {
@@ -417,6 +417,18 @@
   gap: 7px;
 }
 
+.pkg-form .selected-subcategories-content .admin-pagination {
+  padding-top: 10px;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.pkg-form .selected-subcategories-content .admin-pagination button {
+  min-width: 0;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+
 .pkg-form .selected-subcategory-chip {
   display: inline-flex;
   align-items: center;
@@ -465,6 +477,41 @@
   color: #98989d;
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* The category picker is a shared admin control: keep it on the active theme
+   instead of carrying its original dark-only palette into light mode. */
+html[data-theme] .pkg-form .package-category-field,
+html[data-theme] .pkg-form .selected-subcategories-panel {
+  background: var(--app-card-soft);
+  border-color: var(--app-border);
+  box-shadow: none;
+}
+
+html[data-theme] .pkg-form :is(.package-category-label, .selected-subcategories-title),
+html[data-theme] .pkg-form .package-category-field .react-select__single-value,
+html[data-theme] .pkg-form .package-category-field .react-select__input-container,
+html[data-theme] .pkg-form .package-category-field .react-select__indicator,
+html[data-theme] .pkg-form .package-category-field .react-select__option,
+html[data-theme] .pkg-form .selected-subcategory-chip {
+  color: var(--app-text);
+}
+
+html[data-theme] .pkg-form .package-category-field small,
+html[data-theme] .pkg-form .package-category-field .react-select__placeholder,
+html[data-theme] .pkg-form .selected-subcategories-empty {
+  color: var(--app-text-muted);
+}
+
+html[data-theme] .pkg-form .package-category-field .react-select__control,
+html[data-theme] .pkg-form .package-category-field .react-select__menu {
+  background: var(--app-input);
+  border-color: var(--app-input-border);
+}
+
+html[data-theme] .pkg-form .selected-subcategory-chip {
+  background: var(--app-accent-soft);
+  border-color: var(--app-accent);
 }
 
 /* ======================= */

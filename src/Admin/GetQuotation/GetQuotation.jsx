@@ -112,11 +112,9 @@ const normalizeItinerary = (items = [], count = 0) => {
       title: existing.title || `Day ${day}`,
       desc: existing.desc || existing.description || "",
       description: existing.description || existing.desc || "",
-      imageUrls: Array.isArray(existing.imageUrls)
-        ? existing.imageUrls
-        : Array.isArray(existing.images)
-        ? existing.images
-        : []
+      // Quotation media belongs only to this browser session; package retrieval
+      // deliberately never restores images saved by an earlier quotation.
+      imageUrls: []
     };
   });
 };
@@ -298,7 +296,7 @@ export default function GetQuotation() {
         info: json.info || {}
       });
       setQuoteItinerary(editableItinerary);
-      setHotelImages(normalizeHotelImages(json.quotationHotelImages));
+      setHotelImages(normalizeHotelImages());
       setEmailStatus(null);
 
       setForm((prev) => ({

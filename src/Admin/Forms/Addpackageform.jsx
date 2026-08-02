@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import api from "../../Utils/api";
-import { IMAGE_FILE_ACCEPT, resolveAssetUrl, uploadFile, validateImageFile } from "../../Utils/fileUpload";
+import { IMAGE_FILE_ACCEPT, resolveAssetUrl, uploadFile } from "../../Utils/fileUpload";
+import Pagination, { usePagination } from "../../Common/Pagination";
 
 const categoryCode = (category = {}) => category.code || category.categoryCode || category.id || "";
 
@@ -27,13 +28,12 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     overview: "",
     avgCost: "",
     pickup: "",
-    itinerary: [{ day: 1, title: "", desc: "", imageUrls: [] }],
+    itinerary: [{ day: 1, title: "", desc: "" }],
     note: "",
     includes: "",
     excludes: "",
     heroImages: [null, null, null, null],
-    thumbnail: null,
-    quotationHotelImages: { classic: null, signature: null, elite: null }
+    thumbnail: null
   };
 
   const [form, setForm] = useState(initialState);
@@ -67,14 +67,8 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
         itinerary: data.itinerary?.length ? data.itinerary.map((item) => ({
           day: item.day,
           title: item.title,
-          desc: item.desc || item.description || "",
-          imageUrls: Array.isArray(item.imageUrls) ? item.imageUrls : Array.isArray(item.images) ? item.images : []
-        })) : [{ day: 1, title: "", desc: "", imageUrls: [] }],
-        quotationHotelImages: {
-          classic: data.quotationHotelImages?.classic || null,
-          signature: data.quotationHotelImages?.signature || null,
-          elite: data.quotationHotelImages?.elite || null
-        }
+          desc: item.desc || item.description || ""
+        })) : [{ day: 1, title: "", desc: "" }]
       });
     }
   }, [data, mode]);
@@ -104,7 +98,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       let itinerary = [...prev.itinerary];
       if (days > itinerary.length) {
         for (let i = itinerary.length + 1; i <= days; i += 1) {
-          itinerary.push({ day: i, title: "", desc: "", imageUrls: [] });
+          itinerary.push({ day: i, title: "", desc: "" });
         }
       } else {
         itinerary = itinerary.slice(0, days);
@@ -174,6 +168,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       });
     });
   }, [categories, form.selectedCategories, groupedCategories]);
+  const selectedSubcategoryPagination = usePagination(allSelectedSubcategories, 3);
 
   const brandOptions = ["Holidays", "Adventures", "GroupTour"];
 
@@ -223,47 +218,6 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     setForm({ ...form, itinerary: updated });
   };
 
-  const handleQuotationImageChange = (dayIndex, imageIndex, file) => {
-    try {
-      validateImageFile(file);
-      setForm((prev) => ({
-        ...prev,
-        itinerary: prev.itinerary.map((day, index) => {
-          if (index !== dayIndex) return day;
-          const imageUrls = [...(day.imageUrls || [])];
-          imageUrls[imageIndex] = file;
-          return { ...day, imageUrls };
-        })
-      }));
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  const removeQuotationImage = (dayIndex, imageIndex) => {
-    setForm((prev) => ({
-      ...prev,
-      itinerary: prev.itinerary.map((day, index) => {
-        if (index !== dayIndex) return day;
-        const imageUrls = [...(day.imageUrls || [])];
-        imageUrls.splice(imageIndex, 1);
-        return { ...day, imageUrls };
-      })
-    }));
-  };
-
-  const handleHotelImageChange = (hotelType, file) => {
-    try {
-      validateImageFile(file);
-      setForm((prev) => ({
-        ...prev,
-        quotationHotelImages: { ...prev.quotationHotelImages, [hotelType]: file }
-      }));
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
   const getImageSrc = (img) => {
     if (!img) return "";
     if (typeof img === "string") return resolveAssetUrl(img);
@@ -276,17 +230,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       form.heroImages.filter(Boolean).map((img) => uploadFile(img, "packages"))
     );
     const thumbnailUrl = await uploadFile(form.thumbnail, "packages", { imageOnly: true });
-    const itinerary = await Promise.all(form.itinerary.map(async (day) => ({
-      ...day,
-      imageUrls: await Promise.all((day.imageUrls || []).filter(Boolean)
-        .map((image) => uploadFile(image, "packages", { imageOnly: true })))
-    })));
-    const quotationHotelImages = Object.fromEntries(await Promise.all(
-      Object.entries(form.quotationHotelImages).map(async ([hotelType, image]) => [
-        hotelType,
-        await uploadFile(image, "packages", { imageOnly: true })
-      ])
-    ));
+    const itinerary = form.itinerary.map(({ day, title, desc }) => ({ day, title, desc }));
 
     const payload = {
       packageCode: form.id,
@@ -304,8 +248,7 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       excludes: form.excludes,
       categoryCodes,
       heroImages,
-      thumbnailUrl,
-      quotationHotelImages
+      thumbnailUrl
     };
 
     try {
@@ -385,20 +328,23 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
               <span className="selected-subcategories-count" aria-live="polite">{allSelectedSubcategories.length}</span>
             </div>
             {allSelectedSubcategories.length > 0 ? (
-              <div className="selected-subcategories-list">
-                {allSelectedSubcategories.map((option) => (
-                  <span key={option.code} className="selected-subcategory-chip">
-                    <span className="selected-subcategory-parent">{option.parentName}</span>
-                    <span>{option.label}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSelectedSubcategory(option.parentCode, option.code)}
-                      aria-label={`Remove ${option.label}`}
-                    >
-                      x
-                    </button>
-                  </span>
-                ))}
+              <div className="selected-subcategories-content">
+                <div className="selected-subcategories-list">
+                  {selectedSubcategoryPagination.pageItems.map((option) => (
+                    <span key={option.code} className="selected-subcategory-chip">
+                      <span className="selected-subcategory-parent">{option.parentName}</span>
+                      <span>{option.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeSelectedSubcategory(option.parentCode, option.code)}
+                        aria-label={`Remove ${option.label}`}
+                      >
+                        x
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <Pagination {...selectedSubcategoryPagination} itemCount={allSelectedSubcategories.length} label="selected subcategories" />
               </div>
             ) : (
               <p className="selected-subcategories-empty">
@@ -449,45 +395,6 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
             accept={IMAGE_FILE_ACCEPT}
             onChange={(e) => setForm({ ...form, thumbnail: e.target.files[0] })}
           />
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3>Quotation Images</h3>
-        <p className="quotation-media-help">Add up to three images per itinerary day and one image for each hotel tier. These images appear in quotations generated from this package.</p>
-        <div className="quotation-itinerary-media-list">
-          {form.itinerary.map((day, dayIndex) => (
-            <div className="quotation-itinerary-media-day" key={`quotation-media-${day.day}`}>
-              <strong>Day {day.day} images</strong>
-              <div className="image-grid quotation-media-grid">
-                {[0, 1, 2].map((imageIndex) => {
-                  const image = day.imageUrls?.[imageIndex];
-                  return (
-                    <div className="image-slot" key={imageIndex}>
-                      {getImageSrc(image) ? <img src={getImageSrc(image)} alt={`Day ${day.day}`} /> : <span>Upload image</span>}
-                      {image && <button type="button" onClick={() => removeQuotationImage(dayIndex, imageIndex)} aria-label={`Remove day ${day.day} image ${imageIndex + 1}`}>x</button>}
-                      <input type="file" accept={IMAGE_FILE_ACCEPT} onChange={(event) => handleQuotationImageChange(dayIndex, imageIndex, event.target.files?.[0])} />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="quotation-hotel-media-grid">
-          {["classic", "signature", "elite"].map((hotelType) => {
-            const image = form.quotationHotelImages[hotelType];
-            return (
-              <div className="quotation-hotel-media-card" key={hotelType}>
-                <strong>{hotelType} hotel</strong>
-                <div className="image-slot">
-                  {getImageSrc(image) ? <img src={getImageSrc(image)} alt={`${hotelType} hotel`} /> : <span>Upload hotel image</span>}
-                  {image && <button type="button" onClick={() => setForm((prev) => ({ ...prev, quotationHotelImages: { ...prev.quotationHotelImages, [hotelType]: null } }))} aria-label={`Remove ${hotelType} hotel image`}>x</button>}
-                  <input type="file" accept={IMAGE_FILE_ACCEPT} onChange={(event) => handleHotelImageChange(hotelType, event.target.files?.[0])} />
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
 

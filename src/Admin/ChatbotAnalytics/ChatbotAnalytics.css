@@ -1,8 +1,8 @@
 .chat-analytics-page{
   min-height:100vh;
   padding:24px;
-  background:radial-gradient(circle at top,#0f0f0f 0%,#000 100%);
-  color:#fff;
+  background:var(--app-page-gradient);
+  color:var(--app-text);
   font-family:"Poppins",sans-serif;
   box-sizing:border-box;
 }
@@ -18,22 +18,19 @@
 .chat-analytics-header h1{
   margin:0;
   font-size:26px;
-  background:linear-gradient(90deg,#ff2a3d,#ff6a00);
-  background-clip:text;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  color:var(--app-accent);
 }
 
 .chat-analytics-header p{
   margin:7px 0 0;
-  color:#bdbdbd;
+  color:var(--app-text-muted);
   font-size:13px;
 }
 
 .chat-analytics-header button{
-  border:1px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.05);
-  color:#fff;
+  border:1px solid var(--app-border);
+  background:var(--app-card-soft);
+  color:var(--app-text);
   border-radius:10px;
   padding:10px 16px;
   cursor:pointer;
@@ -49,10 +46,10 @@
 .chat-analytics-stats div,
 .chat-analytics-grid section,
 .chat-analytics-empty{
-  background:rgba(255,255,255,0.035);
-  border:1px solid rgba(255,255,255,0.07);
+  background:var(--app-surface-gradient);
+  border:1px solid var(--app-border);
   border-radius:16px;
-  box-shadow:0 8px 24px rgba(0,0,0,0.35);
+  box-shadow:var(--app-shadow);
   backdrop-filter:blur(8px);
 }
 
@@ -62,7 +59,7 @@
 
 .chat-analytics-stats span{
   display:block;
-  color:#a8a8a8;
+  color:var(--app-text-muted);
   font-size:12px;
   margin-bottom:8px;
 }
@@ -99,11 +96,11 @@
   gap:14px;
   padding:10px 12px;
   border-radius:10px;
-  background:rgba(255,255,255,0.04);
+  background:var(--app-card-soft);
 }
 
 .chat-analytics-list span{
-  color:#e5e5e5;
+  color:var(--app-text);
   font-size:13px;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -115,12 +112,12 @@
 }
 
 .chat-analytics-list strong{
-  color:#ff4b2b;
+  color:var(--app-accent);
 }
 
 .chat-analytics-muted,
 .chat-analytics-empty{
-  color:#bdbdbd;
+  color:var(--app-text-muted);
 }
 
 .chat-analytics-empty{
