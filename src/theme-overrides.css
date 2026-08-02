@@ -321,6 +321,24 @@ html[data-theme] :where(.tour-search, .grid-search, .unanswered-input):focus {
   outline: none !important;
 }
 
+/* One consistent treatment for list/search controls across the admin suite. */
+html[data-theme] input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 42px;
+  padding: 9px 13px !important;
+  border: 1px solid var(--app-input-border) !important;
+  border-radius: 10px !important;
+  font: inherit;
+  line-height: 1.35;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+html[data-theme] input[type="search"]::-webkit-search-decoration,
+html[data-theme] input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
 html[data-theme] select option {
   background: var(--app-card);
   color: var(--app-text);
