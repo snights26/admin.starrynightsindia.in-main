@@ -172,7 +172,7 @@ function AddFeaturedRowsForm({ mode }) {
             value={packageMode}
             onChange={(e) => { setPackageMode(e.target.value); setSelectedItems([]); setDropdown(""); }}
           >
-            <option value="children">Show selected category subcategories</option>
+            <option value="children">Store selected parent’s subcategories</option>
             <option value="parent">Show selected parent categories directly</option>
           </select>
         )}
