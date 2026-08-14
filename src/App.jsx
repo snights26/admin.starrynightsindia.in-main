@@ -13,6 +13,10 @@ import UsersList from "./Admin/Users/UsersList";
 import EditUser from "./Admin/Users/EditUser";
 import UserLikedPackages from "./Admin/UserLikedPackages/UserLikedPackages";
 import PackageViewAnalytics from "./Admin/PackageViews/PackageViewAnalytics";
+import CacheManagement from "./Admin/CacheManagement/CacheManagement";
+import AdministratorAccounts from "./Admin/AdministratorAccounts/AdministratorAccounts";
+import OccasionPopups from "./Admin/OccasionPopups/OccasionPopups";
+import CustomerSubmissions from "./Admin/CustomerSubmissions/CustomerSubmissions";
 
 import EnquiryList from "./Admin/Enquiry/EnquiryList";
 
@@ -162,7 +166,7 @@ function AppWrapper() {
         />
         <Route
           path="/admin/users/edit/:id"
-          element={<ProtectedRoute><EditUser /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditUser /></ProtectedRoute>}
         />
         <Route
           path="/admin/user-liked-packages"
@@ -171,6 +175,22 @@ function AppWrapper() {
         <Route
           path="/admin/package-views"
           element={<ProtectedRoute><PackageViewAnalytics /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/cache-management"
+          element={<ProtectedRoute><CacheManagement /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/administrator-accounts"
+          element={<ProtectedRoute superAdminOnly><AdministratorAccounts /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/occasion-popups"
+          element={<ProtectedRoute superAdminOnly><OccasionPopups /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin/customer-submissions"
+          element={<ProtectedRoute superAdminOnly><CustomerSubmissions /></ProtectedRoute>}
         />
 
         {/* ENQUIRY */}
@@ -192,7 +212,7 @@ function AppWrapper() {
         />
         <Route
           path="/admin/payments/new"
-          element={<ProtectedRoute><AddPayment /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddPayment /></ProtectedRoute>}
         />
         <Route
           path="/admin/payments/invoice/:bookingId"
@@ -220,11 +240,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/packages/new"
-          element={<ProtectedRoute><AddPackage /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddPackage /></ProtectedRoute>}
         />
         <Route
           path="/admin/packages/edit/:id"
-          element={<ProtectedRoute><EditPackage /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditPackage /></ProtectedRoute>}
         />
 
         {/* CATEGORY */}
@@ -234,11 +254,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/categories/add"
-          element={<ProtectedRoute><AddCategory /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddCategory /></ProtectedRoute>}
         />
         <Route
           path="/admin/categories/edit/:code"
-          element={<ProtectedRoute><EditCategory /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditCategory /></ProtectedRoute>}
         />
 
        
@@ -250,11 +270,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/gallery/add"
-          element={<ProtectedRoute><AddGallery /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddGallery /></ProtectedRoute>}
         />
         <Route
           path="/admin/gallery/edit/:id"
-          element={<ProtectedRoute><EditGallery /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditGallery /></ProtectedRoute>}
         />
 
         {/* HERO SLIDERS */}
@@ -264,11 +284,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/hero-sliders/add"
-          element={<ProtectedRoute><HeroSliderForm mode="add" /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><HeroSliderForm mode="add" /></ProtectedRoute>}
         />
         <Route
           path="/admin/hero-sliders/edit/:id"
-          element={<ProtectedRoute><HeroSliderForm mode="edit" /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><HeroSliderForm mode="edit" /></ProtectedRoute>}
         />
 
         {/* HOMEPAGE STATISTICS */}
@@ -278,11 +298,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/homepage-statistics/add"
-          element={<ProtectedRoute><HomepageStatisticForm mode="add" /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><HomepageStatisticForm mode="add" /></ProtectedRoute>}
         />
         <Route
           path="/admin/homepage-statistics/edit/:id"
-          element={<ProtectedRoute><HomepageStatisticForm mode="edit" /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><HomepageStatisticForm mode="edit" /></ProtectedRoute>}
         />
 
         {/* NOTIFICATIONS */}
@@ -292,11 +312,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/notifications/add"
-          element={<ProtectedRoute><AddNotification /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddNotification /></ProtectedRoute>}
         />
         <Route
           path="/admin/notifications/edit/:id"
-          element={<ProtectedRoute><EditNotification /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditNotification /></ProtectedRoute>}
         />
 
         {/* KEYWORDS */}
@@ -306,11 +326,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/keywords/add"
-          element={<ProtectedRoute><AddKeyword /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddKeyword /></ProtectedRoute>}
         />
         <Route
           path="/admin/keywords/edit/:id"
-          element={<ProtectedRoute><EditKeyword /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditKeyword /></ProtectedRoute>}
         />
 
         {/* UNANSWERED */}
@@ -331,11 +351,11 @@ function AppWrapper() {
         />
         <Route
           path="/admin/featured-rows/add"
-          element={<ProtectedRoute><AddFeaturedRows /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><AddFeaturedRows /></ProtectedRoute>}
         />
         <Route
           path="/admin/featured-rows/edit/:id"
-          element={<ProtectedRoute><EditFeaturedRows /></ProtectedRoute>}
+          element={<ProtectedRoute superAdminOnly><EditFeaturedRows /></ProtectedRoute>}
         />
         <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<Contact />} />

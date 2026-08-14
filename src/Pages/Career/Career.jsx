@@ -11,14 +11,15 @@ window.scrollTo(0,0);
 
 /* FORM STATE */
 
-const [formData,setFormData]=useState({
+  const [formData,setFormData]=useState({
 name:"",
 email:"",
 phone:"",
 position:"",
 about:"",
-resume:null
-});
+  resume:null
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
 /* INPUT CHANGE */
@@ -38,6 +39,7 @@ setFormData({...formData,[name]:value});
 
 const handleSubmit=async(e)=>{
 e.preventDefault();
+if (isSubmitting) return;
 
 const data=new FormData();
 
@@ -50,10 +52,17 @@ data.append("resume",formData.resume);
 
 try{
 
-await fetch(`${apiBaseUrl}/career-apply`,{
+setIsSubmitting(true);
+
+const response = await fetch(`${apiBaseUrl}/career-apply`,{
 method:"POST",
 body:data
 });
+
+if (!response.ok) {
+const payload = await response.json().catch(() => null);
+throw new Error(payload?.message || "Unable to submit your application. Please try again.");
+}
 
 alert("Application Submitted Successfully");
 
@@ -73,7 +82,11 @@ e.target.reset();
 }catch(err){
 
 console.error(err);
-alert("Error submitting application");
+alert(err.message || "Error submitting application");
+
+} finally {
+
+setIsSubmitting(false);
 
 }
 
@@ -549,6 +562,8 @@ onChange={handleChange}
 <input
 type="file"
 name="resume"
+accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+required
 onChange={handleChange}
 />
 
@@ -558,7 +573,9 @@ placeholder="Tell us about yourself"
 onChange={handleChange}
 />
 
-<button type="submit">Submit Application</button>
+<button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+{isSubmitting ? "Submitting application…" : "Submit Application"}
+</button>
 
 </form>
 

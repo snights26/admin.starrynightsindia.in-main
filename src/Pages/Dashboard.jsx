@@ -2,12 +2,13 @@ import { useNavigate } from "react-router-dom";
 import ScheduledBookings from "../Admin/Dashboard/ScheduledBookings";
 import CategoriesGrid from "../Admin/Dashboard/CategoriesGrid";
 import AdminModulesPanel from "../Admin/Dashboard/AdminModulesPanel";
-import { clearSession } from "../Utils/auth";
+import { clearSession, isOperationsAdmin } from "../Utils/auth";
 import "./Dashboard.css";
 
 function Dashboard() {
 
   const navigate = useNavigate();
+  const readOnlyAdmin = isOperationsAdmin();
 
   const handleLogout = () => {
     clearSession();
@@ -34,6 +35,12 @@ function Dashboard() {
         </button>
 
       </div>
+
+      {readOnlyAdmin && (
+        <div className="dbx-read-only-notice" role="status">
+          Operations Admin access: Scheduled Bookings can be managed; all other areas are read-only.
+        </div>
+      )}
 
       {/* MAIN */}
       <div className="dbx-container">

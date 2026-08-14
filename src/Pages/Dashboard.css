@@ -19,6 +19,17 @@
   box-shadow: var(--app-shadow, 0 8px 25px rgba(0, 0, 0, 0.5));
 }
 
+.dbx-read-only-notice {
+  margin: 0 22px 8px;
+  padding: 10px 13px;
+  border: 1px solid color-mix(in srgb, var(--app-warning, #f59e0b) 38%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--app-warning, #f59e0b) 11%, transparent);
+  color: var(--app-text, #ffffff);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .dbx-title h2 {
   font-size: 22px;
   font-weight: 800;
@@ -198,6 +209,10 @@ html[data-theme="dark"] .dbx-wrapper {
 
   .dbx-container {
     padding: 10px;
+  }
+
+  .dbx-read-only-notice {
+    margin: 0 10px 8px;
   }
 
   .dbx-card {

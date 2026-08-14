@@ -1,5 +1,6 @@
 import "./AdminModulesPanel.css";
 import { useNavigate } from "react-router-dom";
+import { isOperationsAdmin } from "../../Utils/auth";
 
 const moduleSections = [
   {
@@ -8,6 +9,9 @@ const moduleSections = [
       "Users",
       "User Package Likes",
       "Package View Analytics",
+      "Cache Management",
+      "Administrator Accounts",
+      "Customer Submissions",
       "Active Enquiry",
       "Payments",
       
@@ -23,7 +27,8 @@ const moduleSections = [
       "Gallery",
       "Hero Sliders",
       "Homepage Statistics",
-      "Featured Rows"
+      "Featured Rows",
+      "Occasion Popups"
     ]
   },
   {
@@ -40,11 +45,15 @@ const moduleSections = [
 function AdminModulesPanel() {
 
   const navigate = useNavigate();
+  const operationsAdmin = isOperationsAdmin();
 
   const routes = {
     "Users": "/admin/users",
     "User Package Likes": "/admin/user-liked-packages",
     "Package View Analytics": "/admin/package-views",
+    "Cache Management": "/admin/cache-management",
+    "Administrator Accounts": "/admin/administrator-accounts",
+    "Customer Submissions": "/admin/customer-submissions",
     "Active Enquiry": "/admin/enquiry",
     "Payments": "/admin/payments",
     "Package": "/admin/packages",
@@ -57,7 +66,8 @@ function AdminModulesPanel() {
     "Keywords": "/admin/keywords",
     "Unanswered Questions": "/admin/unanswered",
     "Chat Analytics": "/admin/chat-analytics",
-    "Featured Rows": "/admin/featured-rows"
+    "Featured Rows": "/admin/featured-rows",
+    "Occasion Popups": "/admin/occasion-popups"
   };
 
   return (
@@ -69,7 +79,12 @@ function AdminModulesPanel() {
         <span>Configure, control, and optimize your business infrastructure</span>
       </div>
 
-      {moduleSections.map((section, i) => (
+      {moduleSections.map((section, i) => {
+        const visibleItems = section.items.filter((item) =>
+          !["Administrator Accounts", "Occasion Popups", "Customer Submissions"].includes(item) || !operationsAdmin
+        );
+
+        return (
 
         <div key={i} className="amp-section">
 
@@ -81,7 +96,7 @@ function AdminModulesPanel() {
           {/* ITEMS */}
           <div className="amp-list">
 
-            {section.items.map((item, j) => (
+            {visibleItems.map((item, j) => (
 
               <div
                 key={j}
@@ -98,7 +113,8 @@ function AdminModulesPanel() {
 
         </div>
 
-      ))}
+        );
+      })}
 
     </div>
 

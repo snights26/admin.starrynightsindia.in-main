@@ -43,7 +43,9 @@
 .payments-actions {
   margin-bottom: 15px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 
@@ -132,6 +134,24 @@
   color: #00ffae;
 }
 
+.payment-mode,
+.payment-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .03em;
+}
+
+.payment-mode--razorpay { background: rgba(56, 189, 248, .16); color: #7dd3fc; }
+.payment-mode--cash { background: rgba(167, 139, 250, .16); color: #c4b5fd; }
+.payment-status--paid { background: rgba(0, 255, 150, .12); color: #00ffae; }
+.payment-status--pending { background: rgba(245, 158, 11, .16); color: #fbbf24; }
+.payment-status--expired,
+.payment-status--cancelled,
+.payment-status--failed { background: rgba(229, 9, 20, .15); color: #ff7070; }
+
 
 /* BUTTONS */
 
@@ -166,6 +186,42 @@
   background: #ff1f1f;
   color: white;
 }
+
+.payments-error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(229, 9, 20, .55);
+  border-radius: 8px;
+  background: rgba(229, 9, 20, .12);
+  color: #ffd4d4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payments-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.payments-table__actions button,
+.payment-list-secondary {
+  padding: 5px 8px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  background: #242424;
+  color: #f4f4f4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.payments-table__actions button:hover,
+.payment-list-secondary:hover { border-color: #e50914; }
+.payments-table__actions button:disabled { cursor: wait; opacity: .6; }
+.payment-provider-detail { color: #9ca3af; font-size: 10px; font-weight: 700; }
 
 
 /* BACK BUTTON */
@@ -220,6 +276,8 @@
   /* ADD BUTTON FULL WIDTH */
   .payments-actions {
     justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .add-payment-btn {

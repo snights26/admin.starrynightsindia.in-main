@@ -7,6 +7,16 @@ export const setAdminUser = (user) => {
   localStorage.setItem("adminUser", JSON.stringify(user));
 };
 
+export const getAdminUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("adminUser") || "null");
+  } catch {
+    return null;
+  }
+};
+
+export const isOperationsAdmin = () => getAdminUser()?.role === "ADMIN";
+
 export const clearSession = () => {
   localStorage.removeItem("adminToken");
   localStorage.removeItem("tokenExpiry");

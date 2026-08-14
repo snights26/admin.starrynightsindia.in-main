@@ -2,7 +2,7 @@ import "./Addcategoryfroms.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../Utils/api";
-import { resolveAssetUrl, uploadFile } from "../../Utils/fileUpload";
+import { IMAGE_FILE_ACCEPT, resolveAssetUrl, uploadFile } from "../../Utils/fileUpload";
 
 function Addcategoryfroms({ mode }) {
   const navigate = useNavigate();

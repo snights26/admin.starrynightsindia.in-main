@@ -1,10 +1,14 @@
 import { Navigate } from "react-router-dom";
-import { isAuthenticated } from "../Utils/auth";
+import { isAuthenticated, isOperationsAdmin } from "../Utils/auth";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, superAdminOnly = false }) {
 
   if(!isAuthenticated()){
     return <Navigate to="/" />;
+  }
+
+  if (superAdminOnly && isOperationsAdmin()) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

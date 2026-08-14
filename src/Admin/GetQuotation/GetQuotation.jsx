@@ -470,11 +470,8 @@ export default function GetQuotation() {
       formData.append("packageName", data?.heroTitle || data?.packageCode || "Travel Package");
       formData.append("packageCode", data?.packageCode || pkgId || "quotation");
       formData.append("quotation", pdf.output("blob"), filename);
-      // Match the established multipart upload convention so the PDF part is
-      // parsed consistently by Spring's multipart resolver.
-      await api.post("/quotations/email", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      // Leave the multipart header to the browser/Axios so its required boundary is present.
+      await api.post("/quotations/email", formData);
       setEmailStatus({ type: "success", message: `Quotation sent to ${customerEmail}.` });
     } catch (error) {
       setEmailStatus({
