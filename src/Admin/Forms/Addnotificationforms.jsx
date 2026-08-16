@@ -148,7 +148,7 @@ function Addnotificationforms({ mode }) {
             </div>
             <div className="file-upload">
               <label>Upload PDF</label>
-              <input type="file" name="pdf" onChange={handleFileChange} />
+              <input type="file" name="pdf" accept="application/pdf,.pdf" onChange={handleFileChange} />
             </div>
           </>
         )}
