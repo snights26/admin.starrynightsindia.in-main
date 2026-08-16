@@ -64,26 +64,23 @@
 .dbx-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(320px, 26vw, 440px);
-  align-items: stretch;
+  align-items: start;
   gap: 18px;
   padding: 10px 22px 24px;
-  height: calc(100dvh - 124px);
-  min-height: 760px;
-  max-height: 920px;
+  min-height: 0;
 }
 
 .dbx-left {
   min-width: 0;
   display: grid;
-  grid-template-rows: 340px minmax(0, 1fr);
+  grid-template-rows: auto auto;
   gap: 16px;
-  height: 100%;
 }
 
 .dbx-right {
   min-width: 0;
   display: flex;
-  height: 100%;
+  align-items: flex-start;
 }
 
 .dbx-card {
@@ -97,8 +94,7 @@
 }
 
 .dbx-category-shell {
-  overflow: hidden;
-  height: 100%;
+  overflow: visible;
   display: flex;
   min-height: 0;
 }
@@ -106,29 +102,31 @@
 .dbx-category-shell .admin-grid-container {
   flex: 1;
   max-width: none;
-  height: 100%;
+  height: auto;
   max-height: none;
   margin-top: 0;
   margin-bottom: 0;
 }
 
 .dbx-scroll {
-  height: 100%;
-  max-height: none;
-  overflow-y: auto;
-}
-
-.dbx-sticky {
-  position: static;
-  width: 100%;
-  align-self: stretch;
-  height: 100%;
-  max-height: none;
+  height: auto;
   overflow: visible;
 }
 
+.dbx-sticky {
+  position: sticky;
+  top: 14px;
+  width: 100%;
+  align-self: stretch;
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .dbx-sticky .amp-wrapper {
-  min-height: 100%;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
 }
 
 .dbx-scroll::-webkit-scrollbar {
@@ -179,13 +177,10 @@ html[data-theme="dark"] .dbx-wrapper {
     position: static;
     max-height: unset;
     height: auto;
-  }
-
-  .dbx-scroll {
-    height: auto;
-    max-height: none;
     overflow: visible;
   }
+
+  .dbx-scroll { height: auto; overflow: visible; }
 }
 
 @media (max-width: 768px) {
@@ -234,8 +229,5 @@ html[data-theme="dark"] .dbx-wrapper {
     padding: 7px 12px;
   }
 
-  .dbx-scroll {
-    max-height: 550px;
-    overflow-y: auto;
-  }
+  .dbx-scroll { max-height: none; overflow: visible; }
 }

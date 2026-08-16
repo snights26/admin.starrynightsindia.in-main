@@ -55,6 +55,9 @@ html {
 
 body {
   margin: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: var(--sans);
   line-height: 1.45;
 
@@ -120,17 +123,32 @@ textarea {
 }
 
 /* ================= SCROLLBAR ================= */
+/* Keep scroll areas discoverable and usable. Previous global rules hid every
+   scrollbar, including the Admin dashboard's nested panels. */
 html,
 body,
 * {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-accent) var(--app-card-soft);
 }
 
 ::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
-  display: none !important;
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--app-card-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid var(--app-card-soft);
+  border-radius: 999px;
+  background: var(--app-accent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--app-accent-hover);
 }
 
 [data-theme="light"] body {
