@@ -1,7 +1,15 @@
 import axios from "axios";
 
+const configuredApiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "")
+  .trim()
+  .replace(/\/+$/, "");
+
+if (!configuredApiBaseUrl) {
+  throw new Error("VITE_API_BASE_URL must be configured for the Admin application.");
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
+  baseURL: configuredApiBaseUrl,
 });
 
 api.interceptors.request.use((config) => {
@@ -14,6 +22,6 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use((response) => response.data?.data ?? response.data);
 
-export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+export const apiBaseUrl = configuredApiBaseUrl;
 
 export default api;
