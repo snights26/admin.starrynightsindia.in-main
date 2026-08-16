@@ -75,7 +75,7 @@ import Career from "./Pages/Career/Career";
 import { createPortal } from "react-dom";
 import ScrollToTop from "./Components/ScrollToTop";
 import { clearSession } from "./Utils/auth";
-import { CustomAlertProvider, ThemeProvider, ThemeToggle } from "./common";
+import { CustomAlertProvider, ThemeProvider, ThemeToggle } from "./Common";
 
 
 import "./App.css";
