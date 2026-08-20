@@ -16,6 +16,7 @@ function AddFeaturedRowsForm({ mode }) {
   const [packages, setPackages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [packageMode, setPackageMode] = useState("name");
+  const [categoryMatchOperator, setCategoryMatchOperator] = useState("OR");
   const [selectedItems, setSelectedItems] = useState([]);
   const [dropdown, setDropdown] = useState("");
 
@@ -47,6 +48,7 @@ function AddFeaturedRowsForm({ mode }) {
           visibleOn: row.visibleOn || "home"
         });
         setPackageMode(row.packageMode || "name");
+        setCategoryMatchOperator(row.categoryMatchOperator === "AND" ? "AND" : "OR");
         setSelectedItems((row.items || []).map((item) => ({
           id: item.id || item.code,
           title: item.title,
@@ -71,6 +73,7 @@ function AddFeaturedRowsForm({ mode }) {
 
   const isPackageRow = form.type === "package" || form.type === "top10";
   const isSubcategorySelection = form.type === "package" && packageMode === "subcategory";
+  const categoryFilteringApplies = isSubcategorySelection;
   const currentList = isPackageRow
     ? isSubcategorySelection ? subcategories : packages
     : parentCategories;
@@ -102,6 +105,7 @@ function AddFeaturedRowsForm({ mode }) {
       type: form.type,
       visibleOn: form.visibleOn,
       packageMode,
+      categoryMatchOperator,
       items: selectedItems.map((item) => ({
         id: item.id,
         title: item.title,
@@ -176,6 +180,39 @@ function AddFeaturedRowsForm({ mode }) {
             <option value="children">Store selected parent’s subcategories</option>
             <option value="parent">Show selected parent categories directly</option>
           </select>
+        )}
+
+        {categoryFilteringApplies && (
+          <fieldset className="frf-match-logic">
+            <legend>Category Match Logic</legend>
+            <div className="frf-match-options">
+              <label>
+                <input
+                  type="radio"
+                  name="categoryMatchOperator"
+                  value="OR"
+                  checked={categoryMatchOperator === "OR"}
+                  onChange={(e) => setCategoryMatchOperator(e.target.value)}
+                />
+                <span>Match Any (OR)</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="categoryMatchOperator"
+                  value="AND"
+                  checked={categoryMatchOperator === "AND"}
+                  onChange={(e) => setCategoryMatchOperator(e.target.value)}
+                />
+                <span>Match All (AND)</span>
+              </label>
+            </div>
+            <p>
+              {categoryMatchOperator === "AND"
+                ? "Show only packages matching all selected categories."
+                : "Show packages matching any selected category."}
+            </p>
+          </fieldset>
         )}
 
         <select className="frf-input" value={form.visibleOn} onChange={(e) => setForm({ ...form, visibleOn: e.target.value })}>

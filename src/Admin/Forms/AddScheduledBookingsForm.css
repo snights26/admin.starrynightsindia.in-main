@@ -241,6 +241,29 @@
   height:38px;
 }
 
+.sbf-remove-row{
+  min-height:36px;
+  padding:0 12px;
+  border:1px solid rgba(229,9,20,0.65);
+  border-radius:8px;
+  background:transparent;
+  color:#ff8d93;
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+  font-weight:600;
+  white-space:nowrap;
+  transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.sbf-remove-row:hover,
+.sbf-remove-row:focus-visible{
+  border-color:#e50914;
+  background:#e50914;
+  color:#fff;
+  outline:none;
+}
+
 /* ========================= */
 /* ADD ROW */
 /* ========================= */

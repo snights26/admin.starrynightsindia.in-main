@@ -41,6 +41,7 @@ export default function AddScheduledBookingsForm({ mode }) {
   const [dropDate, setDropDate] = useState(null);
   const [duration, setDuration] = useState("");
   const [dateError, setDateError] = useState("");
+  const [accommodationError, setAccommodationError] = useState("");
 
   const [popup, setPopup] = useState(false);
 
@@ -172,15 +173,80 @@ const removeFile = (index) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const toDateString = (value) => value ? value.toLocaleDateString("en-CA") : "";
+  const pickupDateValue = toDateString(pickupDate);
+  const dropDateValue = toDateString(dropDate);
+  const hasValidTravelRange = Boolean(pickupDateValue && dropDateValue && pickupDateValue <= dropDateValue);
+
+  const validateAccommodation = (accommodation, range = { pickup: pickupDateValue, drop: dropDateValue }) => {
+    const activeRows = accommodation
+      .map((row, index) => ({ ...row, index }))
+      .filter((row) => [row.city, row.checkin, row.checkout, row.hotel, row.contact]
+        .some((value) => String(value || "").trim()));
+
+    if (!activeRows.length) return "";
+    if (!range.pickup || !range.drop || range.pickup > range.drop) {
+      return "Set a valid pickup and drop date before adding accommodation dates.";
+    }
+
+    let previousCheckout = "";
+    for (const row of activeRows) {
+      const label = `Accommodation row ${row.index + 1}`;
+      if (!row.checkin || !row.checkout) return `${label} needs both check-in and checkout dates.`;
+      if (row.checkin < range.pickup || row.checkout > range.drop) {
+        return `${label} must stay within the pickup and drop date range.`;
+      }
+      if (row.checkout <= row.checkin) return `${label} checkout must be after its check-in date.`;
+      if (previousCheckout && row.checkin < previousCheckout) {
+        return `${label} check-in cannot be before the previous hotel checkout.`;
+      }
+      previousCheckout = row.checkout;
+    }
+    return "";
+  };
+
   /* HOTEL */
   const addRow = () => {
-    setRows([...rows, { city: "", checkin: "", checkout: "", hotel: "", contact: "" }]);
+    if (!hasValidTravelRange) {
+      setAccommodationError("Set a valid pickup and drop date before adding accommodation.");
+      return;
+    }
+    if (rows.length && !rows.at(-1).checkout) {
+      setAccommodationError("Set the previous hotel checkout date before adding the next accommodation.");
+      return;
+    }
+    const previousCheckout = rows.at(-1)?.checkout || pickupDateValue;
+    const updated = [...rows, { city: "", checkin: previousCheckout, checkout: "", hotel: "", contact: "" }];
+    setRows(updated);
+    setAccommodationError(validateAccommodation(updated));
   };
 
   const handleRowChange = (i, field, value) => {
-    const updated = [...rows];
-    updated[i][field] = value;
+    const updated = rows.map((row, index) => index === i ? { ...row, [field]: value } : { ...row });
+    if (field === "checkout" && updated[i + 1] && value) {
+      updated[i + 1].checkin = value;
+      if (updated[i + 1].checkout && updated[i + 1].checkout <= value) {
+        updated[i + 1].checkout = "";
+      }
+    }
     setRows(updated);
+    setAccommodationError(validateAccommodation(updated));
+  };
+
+  const removeRow = (index) => {
+    const updated = rows.filter((_, rowIndex) => rowIndex !== index);
+    const nextRow = updated[index];
+
+    if (nextRow) {
+      const precedingCheckout = index > 0 ? updated[index - 1]?.checkout : pickupDateValue;
+      nextRow.checkin = precedingCheckout || "";
+      if (nextRow.checkout && (!nextRow.checkin || nextRow.checkout <= nextRow.checkin)) {
+        nextRow.checkout = "";
+      }
+    }
+
+    setRows(updated);
+    setAccommodationError(validateAccommodation(updated));
   };
 
   /* DATE */
@@ -202,19 +268,24 @@ const removeFile = (index) => {
   const handlePickup = (d) => {
     setPickupDate(d);
     calculateDuration(d, dropDate);
+    setAccommodationError(validateAccommodation(rows, { pickup: toDateString(d), drop: dropDateValue }));
   };
 
   const handleDrop = (d) => {
     setDropDate(d);
     calculateDuration(pickupDate, d);
+    setAccommodationError(validateAccommodation(rows, { pickup: pickupDateValue, drop: toDateString(d) }));
   };
 
   /* SUBMIT */
-  const toDateString = (value) => value ? value.toLocaleDateString("en-CA") : "";
-
   const handleSubmit = async () => {
 
     if (dateError) return;
+    const currentAccommodationError = validateAccommodation(rows);
+    if (currentAccommodationError) {
+      setAccommodationError(currentAccommodationError);
+      return;
+    }
 
     const payload = {
       ...form,
@@ -295,6 +366,7 @@ const removeFile = (index) => {
               onChange={handlePickup}
               placeholderText="Pickup Date"
               popperPlacement="bottom-start"
+              maxDate={dropDate || undefined}
             />
 
             <DatePicker
@@ -302,6 +374,7 @@ const removeFile = (index) => {
               onChange={handleDrop}
               placeholderText="Drop Date"
               popperPlacement="bottom-start"
+              minDate={pickupDate || undefined}
             />
 
             <input value={duration} readOnly placeholder="Duration"/>
@@ -312,6 +385,7 @@ const removeFile = (index) => {
           </div>
 
           {dateError && <p className="sbf-error">{dateError}</p>}
+          {accommodationError && <p className="sbf-error">{accommodationError}</p>}
         </div>
 
         {/* VEHICLE */}
@@ -435,6 +509,7 @@ const removeFile = (index) => {
                   <th>Checkout</th>
                   <th>Hotel</th>
                   <th>Contact</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -442,10 +517,15 @@ const removeFile = (index) => {
                 {rows.map((r, i) => (
                   <tr key={i}>
                     <td><input value={r.city || ""} onChange={(e)=>handleRowChange(i,"city",e.target.value)}/></td>
-                    <td><input type="date" value={r.checkin || ""} onChange={(e)=>handleRowChange(i,"checkin",e.target.value)}/></td>
-                    <td><input type="date" value={r.checkout || ""} onChange={(e)=>handleRowChange(i,"checkout",e.target.value)}/></td>
+                    <td><input type="date" value={r.checkin || ""} onChange={(e)=>handleRowChange(i,"checkin",e.target.value)} min={i > 0 ? rows[i - 1]?.checkout || pickupDateValue : pickupDateValue} max={dropDateValue} disabled={!hasValidTravelRange}/></td>
+                    <td><input type="date" value={r.checkout || ""} onChange={(e)=>handleRowChange(i,"checkout",e.target.value)} min={r.checkin || pickupDateValue} max={dropDateValue} disabled={!hasValidTravelRange}/></td>
                     <td><input value={r.hotel || ""} onChange={(e)=>handleRowChange(i,"hotel",e.target.value)}/></td>
                     <td><input value={r.contact || ""} onChange={(e)=>handleRowChange(i,"contact",e.target.value)}/></td>
+                    <td>
+                      <button type="button" className="sbf-remove-row" onClick={() => removeRow(i)}>
+                        Delete row
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

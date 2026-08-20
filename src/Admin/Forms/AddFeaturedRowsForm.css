@@ -88,6 +88,56 @@
   opacity: 0.7;
 }
 
+.frf-match-logic {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: var(--app-card-soft);
+}
+
+.frf-match-logic legend {
+  padding: 0 6px;
+  color: var(--app-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.frf-match-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.frf-match-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--app-input-border);
+  border-radius: 8px;
+  background: var(--app-input);
+  color: var(--app-text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.frf-match-options input {
+  accent-color: var(--app-accent);
+}
+
+.frf-match-options label:has(input:focus-visible) {
+  box-shadow: var(--app-focus);
+}
+
+.frf-match-logic p {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
 .frf-add-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
