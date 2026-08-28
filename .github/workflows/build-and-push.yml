@@ -1,4 +1,4 @@
-name: Build and Push
+name: Build and Deploy
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 jobs:
   build-beta:
+    name: Build Beta
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,18 +27,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push beta image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/snights26/admin.starrynightsindia.in:beta-${{ github.sha }}
+          tags: |
+            ghcr.io/snights26/admin.starrynightsindia.in:beta-${{ github.sha }}
+            ghcr.io/snights26/admin.starrynightsindia.in:beta-latest
           build-args: |
             VITE_API_BASE_URL=${{ vars.BETA_VITE_API_BASE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-prod:
+  build-production:
+    name: Build Production
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,13 +61,55 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push production image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/snights26/admin.starrynightsindia.in:prod-${{ github.sha }}
+          tags: |
+            ghcr.io/snights26/admin.starrynightsindia.in:prod-${{ github.sha }}
+            ghcr.io/snights26/admin.starrynightsindia.in:prod-latest
+            ghcr.io/snights26/admin.starrynightsindia.in:latest
           build-args: |
             VITE_API_BASE_URL=${{ vars.PROD_VITE_API_BASE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [build-production]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify Portainer credentials
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            'https://portainer.buildstack.dpdns.org/api/users/me' \
+            -H 'X-API-Key: ${{ secrets.PORTAINER_API_KEY }}')
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Portainer authentication failed (HTTP $HTTP_CODE). Check PORTAINER_API_KEY secret."
+            exit 1
+          fi
+
+          echo "Portainer authentication verified."
+
+      - name: Force update production service
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT \
+            'https://portainer.buildstack.dpdns.org/api/endpoints/6/forceupdateservice' \
+            -H 'X-API-Key: ${{ secrets.PORTAINER_API_KEY }}' \
+            -H 'Content-Type: application/json' \
+            -d '{"serviceID":"${{ secrets.PORTAINER_SERVICE_ID }}","pullImage":true}')
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "Response body: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Service update failed (HTTP $HTTP_CODE)."
+            exit 1
+          fi
+
+          echo "Service updated successfully."
