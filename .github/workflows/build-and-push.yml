@@ -113,3 +113,37 @@ jobs:
           fi
 
           echo "Service updated successfully."
+
+      - name: Ensure service replica count is 1
+        run: |
+          SERVICE=$(curl -s \
+            "https://portainer.buildstack.dpdns.org/api/endpoints/6/docker/v1.41/services/${{ secrets.PORTAINER_SERVICE_ID }}" \
+            -H 'X-API-Key: ${{ secrets.PORTAINER_API_KEY }}')
+
+          VERSION=$(echo "$SERVICE" | jq '.Version.Index')
+          SPEC=$(echo "$SERVICE" | jq '.Spec | .Mode.Replicated.Replicas = 1')
+
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Failed to fetch service version. Cannot scale."
+            exit 1
+          fi
+
+          echo "Current version index: $VERSION. Setting replicas to 1."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://portainer.buildstack.dpdns.org/api/endpoints/6/docker/v1.41/services/${{ secrets.PORTAINER_SERVICE_ID }}/update?version=$VERSION" \
+            -H 'X-API-Key: ${{ secrets.PORTAINER_API_KEY }}' \
+            -H 'Content-Type: application/json' \
+            -d "$SPEC")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "Response body: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Scale to 1 replica failed (HTTP $HTTP_CODE)."
+            exit 1
+          fi
+
+          echo "Service scaled to 1 replica successfully."
