@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ScheduledBookings from "../Admin/Dashboard/ScheduledBookings";
 import CategoriesGrid from "../Admin/Dashboard/CategoriesGrid";
 import AdminModulesPanel from "../Admin/Dashboard/AdminModulesPanel";
-import { clearSession, isOperationsAdmin } from "../Utils/auth";
+import { isOperationsAdmin, logoutAdmin } from "../Utils/auth";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -11,7 +11,7 @@ function Dashboard() {
   const readOnlyAdmin = isOperationsAdmin();
 
   const handleLogout = () => {
-    clearSession();
+    logoutAdmin();
     navigate("/");
   };
 

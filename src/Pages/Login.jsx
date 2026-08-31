@@ -25,8 +25,12 @@ function Login() {
         username: form.identifier.trim(),
         password: form.password,
       });
-      setSession(data.accessToken, new Date(data.accessTokenExpiresAt).getTime());
-      localStorage.setItem("adminRefreshToken", data.refreshToken);
+      setSession(
+        data.accessToken,
+        new Date(data.accessTokenExpiresAt).getTime(),
+        data.refreshToken,
+        new Date(data.refreshTokenExpiresAt).getTime(),
+      );
       setAdminUser(data.user);
       navigate("/dashboard");
     } catch {

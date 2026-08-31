@@ -1,6 +1,8 @@
-export const setSession = (token, expiry) => {
+export const setSession = (token, expiry, refreshToken, refreshExpiry) => {
   localStorage.setItem("adminToken", token);
   localStorage.setItem("tokenExpiry", expiry);
+  localStorage.setItem("adminRefreshToken", refreshToken);
+  localStorage.setItem("adminRefreshExpiry", refreshExpiry);
 };
 
 export const setAdminUser = (user) => {
@@ -21,7 +23,16 @@ export const clearSession = () => {
   localStorage.removeItem("adminToken");
   localStorage.removeItem("tokenExpiry");
   localStorage.removeItem("adminRefreshToken");
+  localStorage.removeItem("adminRefreshExpiry");
   localStorage.removeItem("adminUser");
+};
+
+export const logoutAdmin = () => {
+  const refreshToken = localStorage.getItem("adminRefreshToken");
+  clearSession();
+  if (refreshToken) {
+    api.post("/auth/logout", { refreshToken }).catch(() => {});
+  }
 };
 
 export const isAuthenticated = () => {
@@ -37,3 +48,4 @@ export const isAuthenticated = () => {
 
   return true;
 };
+import api from "./api";

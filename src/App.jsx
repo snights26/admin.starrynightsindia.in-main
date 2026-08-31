@@ -74,38 +74,54 @@ import Contact from "./Pages/Contact/Contact";
 import Career from "./Pages/Career/Career";
 import { createPortal } from "react-dom";
 import ScrollToTop from "./Components/ScrollToTop";
-import { clearSession } from "./Utils/auth";
+import api from "./Utils/api";
+import { logoutAdmin, setAdminUser, setSession } from "./Utils/auth";
 import { CustomAlertProvider, ThemeProvider, ThemeToggle } from "./Common";
 
 
 import "./App.css";
 import "./theme-overrides.css";
 
+const ADMIN_SESSION_WARNING_TIME = 5 * 60 * 1000;
+
 function AppWrapper() {
   
 
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [showSessionWarning, setShowSessionWarning] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [continuingSession, setContinuingSession] = useState(false);
 
   useEffect(() => {
-
-    const interval = setInterval(() => {
-
+    const evaluateSession = () => {
       const token = localStorage.getItem("adminToken");
       const expiry = localStorage.getItem("tokenExpiry");
 
-      if (token && expiry && Date.now() > Number(expiry)) {
-
-        setShowModal(true);
-
-        clearSession();
-
+      if (!token || !expiry) {
+        setShowSessionWarning(false);
+        return;
       }
 
-    }, 3000);
+      const timeLeft = Number(expiry) - Date.now();
+      if (timeLeft <= 0) {
+        setShowModal(true);
+        setShowSessionWarning(false);
+        logoutAdmin();
+        return;
+      }
 
+      if (timeLeft <= ADMIN_SESSION_WARNING_TIME) {
+        setRemainingSeconds(Math.ceil(timeLeft / 1000));
+        setShowSessionWarning(true);
+      } else {
+        setShowSessionWarning(false);
+      }
+    };
+
+    evaluateSession();
+    const interval = setInterval(evaluateSession, 1000);
     return () => clearInterval(interval);
-
   }, []);
 
   const handleLoginRedirect = () => {
@@ -113,11 +129,56 @@ function AppWrapper() {
     navigate("/");
   };
 
+  const handleContinueSession = async () => {
+    const refreshToken = localStorage.getItem("adminRefreshToken");
+    const refreshExpiry = Number(localStorage.getItem("adminRefreshExpiry"));
+    if (!refreshToken || !refreshExpiry || refreshExpiry <= Date.now()) {
+      logoutAdmin();
+      setShowSessionWarning(false);
+      setShowModal(true);
+      return;
+    }
+
+    setContinuingSession(true);
+    try {
+      const data = await api.post("/auth/refresh", { refreshToken });
+      setSession(
+        data.accessToken,
+        new Date(data.accessTokenExpiresAt).getTime(),
+        data.refreshToken,
+        new Date(data.refreshTokenExpiresAt).getTime(),
+      );
+      setAdminUser(data.user);
+      setShowSessionWarning(false);
+      setRemainingSeconds(0);
+    } catch {
+      logoutAdmin();
+      setShowSessionWarning(false);
+      setShowModal(true);
+    } finally {
+      setContinuingSession(false);
+    }
+  };
+
   return (
     <>
 <CustomAlertProvider />
 <ScrollToTop />
       {/* SESSION MODAL */}
+      {showSessionWarning && !showModal &&
+  createPortal(
+    <div className="session-modal" role="dialog" aria-modal="true" aria-labelledby="admin-session-warning-title">
+      <div className="session-box">
+        <h2 id="admin-session-warning-title">Session expiring soon</h2>
+        <p>Your Admin session expires in {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, "0")}.</p>
+        <button type="button" onClick={handleContinueSession} disabled={continuingSession}>
+          {continuingSession ? "Continuing session…" : "Continue session"}
+        </button>
+      </div>
+    </div>,
+    document.body
+  )
+}
       {showModal &&
   createPortal(
     <div className="session-modal">
