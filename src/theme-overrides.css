@@ -1342,6 +1342,28 @@ html[data-theme] .quotation-container .quote-hotel-fields > label > span {
   color: var(--app-text-muted) !important;
 }
 
+html[data-theme] .quotation-container .quote-hotel-mode legend {
+  color: var(--app-text-muted) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-mode label {
+  background: var(--app-input) !important;
+  border-color: var(--app-input-border) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-mode label.is-active {
+  background: var(--app-accent-soft) !important;
+  border-color: var(--app-accent) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-mode strong {
+  color: var(--app-text) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-mode small {
+  color: var(--app-text-muted) !important;
+}
+
 html[data-theme] .quotation-container .quote-hotel-entry {
   background: var(--app-input) !important;
   border-color: var(--app-input-border) !important;

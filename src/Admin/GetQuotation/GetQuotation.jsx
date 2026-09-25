@@ -25,12 +25,15 @@ const DEFAULT_FORM = {
   tourStartDate: "",
   currency: "INR",
   travelAdvisory: "",
+  hotelMode: "tiered",
   classicHotel: "",
   signatureHotel: "",
   eliteHotel: "",
+  customHotel: "",
   classicPrice: "",
   signaturePrice: "",
   elitePrice: "",
+  customHotelPrice: "",
   overview: "",
   highlights: "",
   includes: "",
@@ -312,6 +315,18 @@ function HotelListInput({ value, onChange, placeholder }) {
 
 function PricingBlock({ form, isInternational }) {
   const label = isInternational ? "International Collection" : "Domestic Collection";
+
+  if (form.hotelMode === "custom") {
+    return (
+      <div className="quote-pricing-grid quote-pricing-grid--custom">
+        <div>
+          <span>Customized {label}</span>
+          <strong>{formatPrice(form.customHotelPrice, form.currency)}</strong>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="quote-pricing-grid">
       <div>
@@ -546,10 +561,19 @@ export default function GetQuotation() {
         day.desc || day.description || "Details will be shared by the operations team."
       ].join("\n");
     }).join("\n\n") || "Detailed itinerary will be shared by the operations team.";
-    const hotels = HOTEL_TIERS.map((tier) => {
-      const title = `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Hotels`;
-      return `${title}\n${list(form[`${tier}Hotel`], "To be confirmed")}`;
-    }).join("\n\n");
+    const hotels = form.hotelMode === "custom"
+      ? `Customized Hotel Details\n${list(form.customHotel, "To be confirmed")}`
+      : HOTEL_TIERS.map((tier) => {
+        const title = `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Hotels`;
+        return `${title}\n${list(form[`${tier}Hotel`], "To be confirmed")}`;
+      }).join("\n\n");
+    const pricing = form.hotelMode === "custom"
+      ? `Customized Hotel Details: ${formatPrice(form.customHotelPrice, form.currency)}`
+      : [
+        `Classic: ${formatPrice(form.classicPrice, form.currency)}`,
+        `Signature: ${formatPrice(form.signaturePrice, form.currency)}`,
+        `Elite: ${formatPrice(form.elitePrice, form.currency)}`
+      ].join("\n");
 
     return [
       "TRAVEL DETAILS",
@@ -563,9 +587,7 @@ export default function GetQuotation() {
       `DETAILED ITINERARY\n${itinerary}`,
       `HOTELS\n${hotels}`,
       "PRICING",
-      `Classic: ${formatPrice(form.classicPrice, form.currency)}`,
-      `Signature: ${formatPrice(form.signaturePrice, form.currency)}`,
-      `Elite: ${formatPrice(form.elitePrice, form.currency)}`,
+      pricing,
       `INCLUSIONS\n${list(form.includes, "To be confirmed")}`,
       `EXCLUSIONS\n${list(form.excludes, "To be confirmed")}`,
       isInternational && form.travelAdvisory ? `TRAVEL ADVISORY\n${form.travelAdvisory}` : "",
@@ -766,39 +788,90 @@ export default function GetQuotation() {
         )}
 
         <h4>Hotel Details</h4>
-        <div className="quote-hotel-fields">
-          <label>
-            <span>Classic Hotels</span>
-            <HotelListInput
-              value={form.classicHotel}
-              onChange={(value) => setForm((previous) => ({ ...previous, classicHotel: value }))}
-              placeholder="Type a hotel name and press Enter"
+        <fieldset className="quote-hotel-mode">
+          <legend>Choose one hotel plan</legend>
+          <label className={form.hotelMode === "tiered" ? "is-active" : ""}>
+            <input
+              type="radio"
+              name="hotel-mode"
+              checked={form.hotelMode === "tiered"}
+              onChange={() => setForm((previous) => ({ ...previous, hotelMode: "tiered" }))}
             />
+            <span>
+              <strong>Classic, Signature & Elite</strong>
+              <small>Show three hotel categories with separate prices.</small>
+            </span>
           </label>
-          <label>
-            <span>Signature Hotels</span>
-            <HotelListInput
-              value={form.signatureHotel}
-              onChange={(value) => setForm((previous) => ({ ...previous, signatureHotel: value }))}
-              placeholder="Type a hotel name and press Enter"
+          <label className={form.hotelMode === "custom" ? "is-active" : ""}>
+            <input
+              type="radio"
+              name="hotel-mode"
+              checked={form.hotelMode === "custom"}
+              onChange={() => setForm((previous) => ({ ...previous, hotelMode: "custom" }))}
             />
+            <span>
+              <strong>Customized Hotel Details</strong>
+              <small>Show one tailored hotel plan with one price.</small>
+            </span>
           </label>
-          <label>
-            <span>Elite Hotels</span>
-            <HotelListInput
-              value={form.eliteHotel}
-              onChange={(value) => setForm((previous) => ({ ...previous, eliteHotel: value }))}
-              placeholder="Type a hotel name and press Enter"
-            />
-          </label>
-        </div>
+        </fieldset>
+
+        {form.hotelMode === "custom" ? (
+          <div className="quote-hotel-fields">
+            <label>
+              <span>Customized Hotel Details</span>
+              <HotelListInput
+                value={form.customHotel}
+                onChange={(value) => setForm((previous) => ({ ...previous, customHotel: value }))}
+                placeholder="Type a hotel name and press Enter"
+              />
+            </label>
+          </div>
+        ) : (
+          <div className="quote-hotel-fields">
+            <label>
+              <span>Classic Hotels</span>
+              <HotelListInput
+                value={form.classicHotel}
+                onChange={(value) => setForm((previous) => ({ ...previous, classicHotel: value }))}
+                placeholder="Type a hotel name and press Enter"
+              />
+            </label>
+            <label>
+              <span>Signature Hotels</span>
+              <HotelListInput
+                value={form.signatureHotel}
+                onChange={(value) => setForm((previous) => ({ ...previous, signatureHotel: value }))}
+                placeholder="Type a hotel name and press Enter"
+              />
+            </label>
+            <label>
+              <span>Elite Hotels</span>
+              <HotelListInput
+                value={form.eliteHotel}
+                onChange={(value) => setForm((previous) => ({ ...previous, eliteHotel: value }))}
+                placeholder="Type a hotel name and press Enter"
+              />
+            </label>
+          </div>
+        )}
 
         <h4>Pricing</h4>
-        <div className="form-row">
-          <input placeholder="Classic Price" value={form.classicPrice} onChange={(event) => setForm({ ...form, classicPrice: event.target.value })} />
-          <input placeholder="Signature Price" value={form.signaturePrice} onChange={(event) => setForm({ ...form, signaturePrice: event.target.value })} />
-          <input placeholder="Elite Price" value={form.elitePrice} onChange={(event) => setForm({ ...form, elitePrice: event.target.value })} />
-        </div>
+        {form.hotelMode === "custom" ? (
+          <div className="form-row">
+            <input
+              placeholder="Customized Hotel Price"
+              value={form.customHotelPrice}
+              onChange={(event) => setForm({ ...form, customHotelPrice: event.target.value })}
+            />
+          </div>
+        ) : (
+          <div className="form-row">
+            <input placeholder="Classic Price" value={form.classicPrice} onChange={(event) => setForm({ ...form, classicPrice: event.target.value })} />
+            <input placeholder="Signature Price" value={form.signaturePrice} onChange={(event) => setForm({ ...form, signaturePrice: event.target.value })} />
+            <input placeholder="Elite Price" value={form.elitePrice} onChange={(event) => setForm({ ...form, elitePrice: event.target.value })} />
+          </div>
+        )}
 
         <h4>Inclusions / Exclusions</h4>
         <textarea placeholder="Includes (one per line)" value={form.includes} onChange={(event) => setForm({ ...form, includes: event.target.value })} />
@@ -885,7 +958,16 @@ export default function GetQuotation() {
             <QuoteHeader template={data.template} title={data.heroTitle} />
             <h3 className="section-title">Hotels, Transfers and Costing</h3>
             <div className="hotel-grid">
-              {HOTEL_TIERS.map((tier) => (
+              {form.hotelMode === "custom" ? (
+                <div className="hotel-grid__custom">
+                  <strong>Customized Hotel Details</strong>
+                  {lines(form.customHotel).length ? (
+                    <ul className="quote-hotel-list">
+                      {lines(form.customHotel).map((hotel) => <li key={hotel}>{hotel}</li>)}
+                    </ul>
+                  ) : <p>Hotel details to be confirmed.</p>}
+                </div>
+              ) : HOTEL_TIERS.map((tier) => (
                 <div key={tier}>
                   <strong>{tier}</strong>
                   {lines(form[`${tier}Hotel`]).length ? (
