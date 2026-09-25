@@ -1,3 +1,4 @@
+// all stats are to be appeared herer.
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Stats.css";
