@@ -1327,15 +1327,64 @@ html[data-theme] :where(.target-badge, .fr-badge) {
   color: var(--app-text) !important;
 }
 
-/* Quotation media editor */
+/* Quotation media and hotel editors */
 html[data-theme] :where(.quote-image-picker, .quotation-itinerary-media-day, .quotation-hotel-media-card) {
   background: var(--app-card-soft) !important;
   border-color: var(--app-border) !important;
   color: var(--app-text) !important;
 }
 
-html[data-theme] :where(.quote-hotel-image-editor strong, .quotation-media-help) {
+html[data-theme] :where(.quotation-media-help) {
   color: var(--app-text-muted) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-fields > label > span {
+  color: var(--app-text-muted) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-entry {
+  background: var(--app-input) !important;
+  border-color: var(--app-input-border) !important;
+}
+
+html[data-theme] .quotation-container .top-form .quote-hotel-entry input,
+html[data-theme] .quotation-container .top-form .quote-hotel-entry input:focus {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--app-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-chip {
+  background: var(--app-accent-soft) !important;
+  border: 1px solid var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-chip button {
+  display: inline-flex !important;
+  width: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  max-height: 16px !important;
+  flex: 0 0 16px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: var(--app-text-muted) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+html[data-theme] .quotation-container .quote-hotel-chip button:hover,
+html[data-theme] .quotation-container .quote-hotel-chip button:focus-visible {
+  transform: none !important;
+  box-shadow: none !important;
+  background: var(--app-accent) !important;
+  color: #ffffff !important;
 }
 
 html[data-theme] .quote-image-picker button {

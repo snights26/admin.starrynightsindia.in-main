@@ -52,6 +52,13 @@
   font-size: 20px;
 }
 
+.quote-form-heading-actions {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .quote-template-pill {
   border-radius: 999px;
   color: #ffffff;
@@ -83,6 +90,7 @@
 }
 
 .top-form input,
+.top-form select,
 .top-form textarea {
   width: 100%;
   box-sizing: border-box;
@@ -103,9 +111,27 @@
 }
 
 .top-form input:focus,
+.top-form select:focus,
 .top-form textarea:focus {
   border-color: #e50914;
   box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+}
+
+.quote-meal-select {
+  cursor: pointer;
+}
+
+.quote-date-field {
+  display: grid;
+  gap: 5px;
+}
+
+.quote-date-field span {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
 }
 
 .btn-row {
@@ -139,10 +165,6 @@
 
 .quote-email-btn {
   background: #0b5d8f;
-}
-
-.quote-back-btn {
-  background: #273142;
 }
 
 .quote-email-status {
@@ -225,6 +247,19 @@ html[data-theme="light"] .quote-email-status.error {
   font-size: 12px;
 }
 
+.itinerary-editor-day-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.itinerary-editor-day-heading time {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .quotation-media-help {
   margin: 0;
   color: #94a3b8;
@@ -232,27 +267,90 @@ html[data-theme="light"] .quote-email-status.error {
   line-height: 1.45;
 }
 
-.quote-editor-image-grid,
-.quote-hotel-image-editor {
+.quote-editor-image-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-.quote-hotel-image-editor {
-  margin-top: 2px;
+.quote-hotel-fields {
+  display: grid;
+  gap: 10px;
 }
 
-.quote-hotel-image-editor > div {
+.quote-hotel-fields > label {
   display: grid;
   gap: 6px;
 }
 
-.quote-hotel-image-editor strong {
+.quote-hotel-fields > label > span {
   color: #cbd5e1;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 0.05em;
-  text-transform: capitalize;
+  text-transform: uppercase;
+}
+
+.quote-hotel-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  box-sizing: border-box;
+  border: 1px solid #2a303a;
+  border-radius: 7px;
+  background: #0d0f13;
+  padding: 6px;
+  cursor: text;
+}
+
+.top-form .quote-hotel-entry input {
+  width: auto;
+  min-width: 170px;
+  flex: 1 1 170px;
+  border: 0;
+  padding: 5px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.top-form .quote-hotel-entry input:focus {
+  box-shadow: none;
+}
+
+.quote-hotel-entry:focus-within {
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+}
+
+.quote-hotel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: #303846;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 5px 7px 5px 9px;
+}
+
+.quote-hotel-chip button {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.quote-hotel-chip button:hover {
+  color: #ffffff;
 }
 
 .quote-image-picker {
@@ -477,6 +575,38 @@ html[data-theme="light"] .itinerary-editor-day strong {
   margin-bottom: 15px;
 }
 
+.quote-package-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-package-summary .section-title {
+  margin-top: 6px;
+}
+
+.quote-overview-copy {
+  margin: 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.quote-highlights-list {
+  columns: 2;
+  column-gap: 24px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.quote-highlights-list li {
+  break-inside: avoid;
+  margin-bottom: 7px;
+  color: #1f2937;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .quote-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -566,6 +696,12 @@ html[data-theme="light"] .itinerary-editor-day strong {
   background: #0b5d8f;
 }
 
+.day-box-date {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .page .day-box h4 {
   margin: 0;
   color: #111827 !important;
@@ -630,6 +766,17 @@ html[data-theme="light"] .itinerary-editor-day strong {
   margin-bottom: 8px;
   color: #0b1f3a;
   font-size: 14px;
+}
+
+.quote-hotel-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.quote-hotel-list li {
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .quote-pricing-grid,
@@ -818,7 +965,6 @@ html[data-theme="light"] .itinerary-editor-day strong {
   }
 
   .quote-editor-image-grid,
-  .quote-hotel-image-editor,
   .page:not(.is-exporting) .quote-day-image-grid {
     grid-template-columns: 1fr;
   }

@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../../Utils/api";
 import Pagination, { usePagination } from "../../Common/Pagination";
 import BackButton from "../../Common/BackButton";
 import "./EnquiryList.css";
 
 function EnquiryList() {
-
-  const navigate = useNavigate();
 
   const [enquiries, setEnquiries] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -66,6 +63,12 @@ function EnquiryList() {
     return `${diff}N_${diff + 1}D`;
   };
 
+  const formatRooms = (rooms) => {
+    const count = Number(rooms);
+    if (!Number.isInteger(count) || count < 1) return "Not specified";
+    return `${count} ${count === 1 ? "Room" : "Rooms"}`;
+  };
+
   /* SEARCH + SORT */
   const filteredEnquiries = enquiries
     .filter(e =>
@@ -102,6 +105,7 @@ function EnquiryList() {
 *Travel Dates* :- ${formatDate(e.startDate)} to ${formatDate(e.endDate)}
 
 *Total Pax* :- ${e.persons} (${e.adult} Adult, ${e.child} Child)
+*No. of Rooms* :- ${formatRooms(e.rooms)}
 
 *Meal Plan* :- ${e.mealplan}
 *Hotel* :- ${e.hotel}
@@ -119,14 +123,21 @@ ${e.message}`;
 
 *${e.destination} Tour*
 
-*Pickup* :- ${e.pickupCity}
-*Duration* :- ${getDuration(e.startDate, e.endDate)}
+*Pickup City* :- ${e.pickupCity}
+*Travel Type* :- ${e.purpose}
 
-*Pax* :- ${e.persons} (${e.adult}A ${e.child}C)
+*Duration* :- ${getDuration(e.startDate, e.endDate)}
+*Travel Dates* :- ${formatDate(e.startDate)} to ${formatDate(e.endDate)}
+
+*Total Pax* :- ${e.persons} (${e.adult} Adult, ${e.child} Child)
+*No. of Rooms* :- ${formatRooms(e.rooms)}
 
 *Meal Plan* :- ${e.mealplan}
 *Hotel* :- ${e.hotel}
 *Vehicle* :- ${e.transport}
+
+*Status* :- ${e.status}
+*Created* :- ${formatDate(e.created)}
 
 *Note* :-
 ${e.message}`;

@@ -28,6 +28,9 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
     overview: "",
     avgCost: "",
     pickup: "",
+    bestTime: "",
+    climate: "",
+    suitable: "",
     itinerary: [{ day: 1, title: "", desc: "" }],
     note: "",
     includes: "",
@@ -56,10 +59,17 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
 
   useEffect(() => {
     if (mode === "edit" && data) {
+      const packageInfo = data.info || {};
       setForm({
         ...initialState,
         ...data,
         id: data.packageCode || data.code || data.id || "",
+        avgCost: data.avgCost || packageInfo.cost || "",
+        pickup: data.pickup || packageInfo.pickup || "",
+        bestTime: data.bestTime || data.bestTimeToVisit || packageInfo.bestTime || "",
+        climate: data.climate || packageInfo.climate || "",
+        suitable: data.suitable || packageInfo.suitable || "",
+        note: data.note || packageInfo.note || "",
         includes: Array.isArray(data.inclusions) ? data.inclusions.join("\n") : data.includes || "",
         excludes: Array.isArray(data.exclusions) ? data.exclusions.join("\n") : data.excludes || "",
         heroImages: data.images?.length ? [...data.images, null, null, null, null].slice(0, 4) : [null, null, null, null],
@@ -242,6 +252,9 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
       overview: form.overview,
       avgCost: form.avgCost,
       pickup: form.pickup,
+      bestTime: form.bestTime,
+      climate: form.climate,
+      suitable: form.suitable,
       itinerary,
       note: form.note,
       includes: form.includes,
@@ -281,6 +294,9 @@ function AddPackageForm({ mode = "add", data = {}, onSubmit }) {
           <input type="number" name="days" value={form.days} onChange={handleChange} />
           <input name="avgCost" value={form.avgCost} onChange={handleChange} placeholder="Cost" />
           <input name="pickup" value={form.pickup} onChange={handleChange} placeholder="Pickup" />
+          <input name="bestTime" value={form.bestTime} onChange={handleChange} placeholder="Best Time to Visit" />
+          <input name="climate" value={form.climate} onChange={handleChange} placeholder="Climate" />
+          <input name="suitable" value={form.suitable} onChange={handleChange} placeholder="Suitable For" />
         </div>
       </div>
 
